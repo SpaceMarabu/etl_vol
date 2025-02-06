@@ -1,14 +1,14 @@
-package com.klimov.etl.vol_work.entity;
+package com.klimov.etl.vol_work.dto.entity;
 
-public class Dag {
+public class DagInfoDto {
 
     private String dagId;
     private Boolean isPaused;
 
-    public Dag() {
+    public DagInfoDto() {
     }
 
-    public Dag(Boolean isPaused) {
+    public DagInfoDto(Boolean isPaused) {
         this.isPaused = isPaused;
     }
 
