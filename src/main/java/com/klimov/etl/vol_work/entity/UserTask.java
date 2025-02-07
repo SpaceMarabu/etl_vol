@@ -1,7 +1,5 @@
 package com.klimov.etl.vol_work.entity;
 
-import jakarta.persistence.*;
-
 import java.util.List;
 
 public class UserTask {

@@ -6,6 +6,7 @@ import com.klimov.etl.vol_work.dto.entity.DagRunInfoDto;
 import com.klimov.etl.vol_work.dto.entity.ListDagRunsDto;
 import com.klimov.etl.vol_work.dto.exceptions.DagNotFoundException;
 import com.klimov.etl.vol_work.dto.exceptions.DagRunNotFoundException;
+import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -14,12 +15,14 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Base64;
 
 @Repository
 public class DagRepositoryImpl implements DagRepository {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final String AIRFLOW_BASE_URL = "http://0.0.0.0:8081/api/v1/";
+    private String encodedAuth = "";
 
     @Override
     public DagRunInfoDto getDagRunInfo(DagRunInfoDto dagRunInfoDto)
@@ -32,6 +35,7 @@ public class DagRepositoryImpl implements DagRepository {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(uri))
                 .header("accept", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
                 .GET()
                 .build();
 
@@ -55,6 +59,7 @@ public class DagRepositoryImpl implements DagRepository {
                 .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns?limit=100",
                         dagInfoDto.getDagId())))
                 .header("accept", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
                 .GET()
                 .build();
 
@@ -85,6 +90,7 @@ public class DagRepositoryImpl implements DagRepository {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s", dagId)))
                 .header("accept", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
                 .GET()
                 .build();
 
@@ -98,31 +104,6 @@ public class DagRepositoryImpl implements DagRepository {
         } else {
             throw new DagNotFoundException("Даг с таким именем не найден, или сервер не ответил");
         }
-    }
-
-    @Override
-    public void pauseDag(DagInfoDto dagInfoDto)
-            throws IOException, InterruptedException, URISyntaxException, DagNotFoundException {
-
-        String json = "{\"is_paused\": true}";
-        HttpResponse<String> response = updateDag(dagInfoDto, json);
-
-        if (response.statusCode() != 200) {
-            throw new DagNotFoundException("Даг с таким именем не найден, или сервер не ответил");
-        }
-    }
-
-    @Override
-    public void unpauseDag(DagInfoDto dagInfoDto)
-            throws IOException, InterruptedException, URISyntaxException, DagNotFoundException {
-
-        String json = "{\"is_paused\": false}";
-        HttpResponse<String> response = updateDag(dagInfoDto, json);
-
-        if (response.statusCode() != 200) {
-            throw new DagNotFoundException("Даг с таким именем не найден, или сервер не ответил");
-        }
-
     }
 
     @Override
@@ -142,6 +123,7 @@ public class DagRepositoryImpl implements DagRepository {
                 .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns", dagRunInfoDto.getDagId())))
                 .header("accept", "application/json")
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
@@ -150,7 +132,7 @@ public class DagRepositoryImpl implements DagRepository {
 
     @Override
     public DagRunInfoDto failDag(DagRunInfoDto dagRunInfoDto)
-            throws IOException, InterruptedException, URISyntaxException {
+            throws IOException, InterruptedException, URISyntaxException, DagRunNotFoundException {
 
         String json = "{\"state\": failed}";
 
@@ -159,10 +141,31 @@ public class DagRepositoryImpl implements DagRepository {
                 .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns", dagRunInfoDto.getDagId())))
                 .header("accept", "application/json")
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
         return getDagRunInfoDto(request);
+    }
+
+    @Override
+    public void checkAuth(String login, String password) throws URISyntaxException, IOException, InterruptedException, UnauthorizedException {
+
+        String auth = login + ":" + password;
+        encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(AIRFLOW_BASE_URL + "/dags/"))
+                .header("accept", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 401) {
+            throw new UnauthorizedException("Ошибка авторизации");
+        }
     }
 
     private DagRunInfoDto getDagRunInfoDto(HttpRequest request) throws IOException, InterruptedException {
@@ -178,12 +181,13 @@ public class DagRepositoryImpl implements DagRepository {
         }
     }
 
-    private HttpResponse<String> updateDag(DagInfoDto dagDto, String json)
+    private HttpResponse<String> updateDag(String dagId, String json)
             throws IOException, InterruptedException, URISyntaxException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s", dagDto.getDagId())))
+                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s", dagId)))
                 .header("accept", "application/json")
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic " + encodedAuth)
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
