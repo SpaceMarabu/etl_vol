@@ -10,6 +10,9 @@ public class UserTask {
     private String taskId;
     private List<String> listConf;
     private String lastRunId;
+    private int countErrors;
+    private boolean isPause;
+    private boolean isDone;
 
     public UserTask(String userId, String dagId, RunType runType, String taskId, List<String> listConf, String lastRunId) {
         this.userId = userId;
@@ -18,9 +21,38 @@ public class UserTask {
         this.taskId = taskId;
         this.listConf = listConf;
         this.lastRunId = lastRunId;
+        this.countErrors = 0;
+        this.isPause = false;
+        this.isDone = false;
     }
 
     public UserTask() {
+    }
+
+    public boolean isPause() {
+        return isPause;
+    }
+
+    public void setPause(boolean pause) {
+        isPause = pause;
+    }
+
+    public boolean isDone() {
+        return isDone;
+    }
+
+    public void done() {
+        isDone = true;
+    }
+
+    public int getCountErrors() {
+        return countErrors;
+    }
+
+    public void incrementError() {
+        if (++this.countErrors > 5) {
+            isPause = true;
+        }
     }
 
     public String getLastRunId() {

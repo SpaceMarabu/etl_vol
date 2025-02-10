@@ -4,11 +4,20 @@ import java.util.List;
 
 public class UserState {
     private User user;
+    private boolean signedIn;
     private List<UserTask> userTaskList;
     private List<DagRun> dagRunList;
 
     public User getUser() {
         return user;
+    }
+
+    public boolean isSignedIn() {
+        return signedIn;
+    }
+
+    public void setSignedIn(boolean signedIn) {
+        this.signedIn = signedIn;
     }
 
     public void setUser(User user) {

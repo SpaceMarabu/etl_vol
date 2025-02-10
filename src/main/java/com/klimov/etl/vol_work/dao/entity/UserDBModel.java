@@ -12,7 +12,7 @@ public class UserDBModel {
     @Column(name = "id")
     private String userId;
     @Column(name = "listTasks")
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserTaskDBModel> listTasks;
 
     public UserDBModel() {

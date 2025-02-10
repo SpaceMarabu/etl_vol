@@ -11,20 +11,21 @@ import java.net.URISyntaxException;
 
 public interface DagRepository {
 
-    DagRunInfoDto getDagRunInfo(DagRunInfoDto dagRunInfoDto)
+    DagRunInfoDto getDagRunInfo(String dagId, String runId)
             throws IOException, InterruptedException, URISyntaxException, DagRunNotFoundException;
 
-    DagRunInfoDto getLastDagRunInfo(DagInfoDto dagInfoDto)
+    DagRunInfoDto getLastDagRunInfo(String dagId)
             throws IOException, InterruptedException, URISyntaxException, DagRunNotFoundException;
 
     DagInfoDto getDagInfo(String dagId)
             throws IOException, InterruptedException, URISyntaxException, DagNotFoundException;
 
-    DagRunInfoDto triggerDag(DagRunInfoDto dagRunInfoDto)
+    DagRunInfoDto triggerDag(String dagId, String conf)
             throws IOException, InterruptedException, URISyntaxException, DagNotFoundException;
 
-    DagRunInfoDto failDag(DagRunInfoDto dagRunInfoDto)
+    DagRunInfoDto failDag(String dagId, String runId)
             throws IOException, InterruptedException, URISyntaxException, DagRunNotFoundException;
 
-    void checkAuth(String login, String password) throws URISyntaxException, IOException, InterruptedException, UnauthorizedException;
+    void checkAccess(String login, String password)
+            throws URISyntaxException, IOException, InterruptedException, UnauthorizedException;
 }

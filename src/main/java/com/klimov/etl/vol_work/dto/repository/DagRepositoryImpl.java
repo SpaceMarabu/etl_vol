@@ -21,16 +21,16 @@ import java.util.Base64;
 public class DagRepositoryImpl implements DagRepository {
 
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String AIRFLOW_BASE_URL = "http://0.0.0.0:8081/api/v1/";
+    private final String AIRFLOW_BASE_URL = "http://0.0.0.0:8081/api/v1";
     private String encodedAuth = "";
 
     @Override
-    public DagRunInfoDto getDagRunInfo(DagRunInfoDto dagRunInfoDto)
+    public DagRunInfoDto getDagRunInfo(String dagId, String runId)
             throws IOException, InterruptedException, DagRunNotFoundException, URISyntaxException {
 
         String uri = AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns/%s",
-                dagRunInfoDto.getDagId(),
-                dagRunInfoDto.getDagRunId());
+                dagId,
+                runId);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(uri))
@@ -52,12 +52,11 @@ public class DagRepositoryImpl implements DagRepository {
     }
 
     @Override
-    public DagRunInfoDto getLastDagRunInfo(DagInfoDto dagInfoDto)
+    public DagRunInfoDto getLastDagRunInfo(String dagId)
             throws IOException, InterruptedException, DagRunNotFoundException, URISyntaxException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns?limit=100",
-                        dagInfoDto.getDagId())))
+                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns?limit=100", dagId)))
                 .header("accept", "application/json")
                 .header("Authorization", "Basic " + encodedAuth)
                 .GET()
@@ -107,20 +106,20 @@ public class DagRepositoryImpl implements DagRepository {
     }
 
     @Override
-    public DagRunInfoDto triggerDag(DagRunInfoDto dagRunInfoDto)
+    public DagRunInfoDto triggerDag(String dagId, String conf)
             throws IOException, InterruptedException, URISyntaxException, DagNotFoundException {
 
-        String conf = String.format("\"conf\": %s,", dagRunInfoDto.getConf());
+        String confF = String.format("\"conf\": %s,", conf);
 
         String json = "{" +
-                conf +
+                confF +
                 "\"dag_run_id\": \"string\"," +
                 "\"logical_date\": \"2025-02-06T20:40:36.002Z\"," +
                 "\"note\": \"string\"" +
                 "}";
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns", dagRunInfoDto.getDagId())))
+                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns", dagId)))
                 .header("accept", "application/json")
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Basic " + encodedAuth)
@@ -131,14 +130,14 @@ public class DagRepositoryImpl implements DagRepository {
     }
 
     @Override
-    public DagRunInfoDto failDag(DagRunInfoDto dagRunInfoDto)
+    public DagRunInfoDto failDag(String dagId, String runId)
             throws IOException, InterruptedException, URISyntaxException, DagRunNotFoundException {
 
         String json = "{\"state\": failed}";
 
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns", dagRunInfoDto.getDagId())))
+                .uri(new URI(AIRFLOW_BASE_URL + String.format("/dags/%s/dagRuns/%s", dagId, runId)))
                 .header("accept", "application/json")
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Basic " + encodedAuth)
@@ -149,13 +148,14 @@ public class DagRepositoryImpl implements DagRepository {
     }
 
     @Override
-    public void checkAuth(String login, String password) throws URISyntaxException, IOException, InterruptedException, UnauthorizedException {
+    public void checkAccess(String login, String password)
+            throws URISyntaxException, IOException, InterruptedException, UnauthorizedException {
 
         String auth = login + ":" + password;
         encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(AIRFLOW_BASE_URL + "/dags/"))
+                .uri(new URI(AIRFLOW_BASE_URL + "/dags"))
                 .header("accept", "application/json")
                 .header("Authorization", "Basic " + encodedAuth)
                 .GET()
