@@ -5,7 +5,6 @@ import java.util.List;
 public class UserState {
     private User user;
     private boolean signedIn;
-    private List<UserTask> userTaskList;
     private List<DagRun> dagRunList;
 
     public User getUser() {
@@ -22,14 +21,6 @@ public class UserState {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public List<UserTask> getUserTaskList() {
-        return userTaskList;
-    }
-
-    public void setUserTaskList(List<UserTask> userTaskList) {
-        this.userTaskList = userTaskList;
     }
 
     public List<DagRun> getDagRunList() {

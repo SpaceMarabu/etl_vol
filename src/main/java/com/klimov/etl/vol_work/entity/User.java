@@ -1,5 +1,6 @@
 package com.klimov.etl.vol_work.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -8,6 +9,11 @@ public class User {
     private List<UserTask> listTasks;
 
     public User() {
+    }
+
+    public User(String userId) {
+        this.userId = userId;
+        this.listTasks = new ArrayList<>();
     }
 
     public User(String userId, List<UserTask> listTasks) {

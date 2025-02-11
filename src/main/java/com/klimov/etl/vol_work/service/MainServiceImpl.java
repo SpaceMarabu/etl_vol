@@ -50,14 +50,6 @@ public class MainServiceImpl implements MainService {
 
     @Transactional
     @Override
-    public User getUser(String userId) {
-        return dBmapper.getUserFromDBModel(
-                userRepository.getUser(userId)
-        );
-    }
-
-    @Transactional
-    @Override
     public List<User> getAllUsers() {
 
         List<User> userList = new ArrayList<>();
@@ -71,12 +63,14 @@ public class MainServiceImpl implements MainService {
         return userList;
     }
 
+    @Scheduled(fixedRate = 600000)
     @Transactional
-    @Override
-    public void saveUser(User user) {
-        userRepository.saveUser(
-                dBmapper.getUserDBModelFromEntity(user)
-        );
+    public void saveUser() {
+        if (userState.isSignedIn()) {
+            userRepository.saveUser(
+                    dBmapper.getUserDBModelFromEntity(userState.getUser())
+            );
+        }
     }
 
     @Override
@@ -102,7 +96,7 @@ public class MainServiceImpl implements MainService {
                 break;
             }
 
-            for (UserTask userTask : tempUserState.getUserTaskList()) {
+            for (UserTask userTask : tempUserState.getUser().getListTasks()) {
                 if (userTask.getDagId().equals(returnedDagRun.getDagId())) {
                     userTask.setPause(true);
                 }
@@ -126,9 +120,10 @@ public class MainServiceImpl implements MainService {
                 UserState tempUserState = this.userState;
 
                 List<DagRun> newDagRuns = new ArrayList<>();
-                List<DagRun> oldDagRuns = tempUserState.getDagRunList();
+                List<DagRun> oldDagRuns = !tempUserState.getDagRunList().isEmpty()
+                        ? tempUserState.getDagRunList() : new ArrayList<>();
 
-                for (UserTask userTask : tempUserState.getUserTaskList()) {
+                for (UserTask userTask : tempUserState.getUser().getListTasks()) {
                     if (userTask.getLastRunId() != null) {
 
                         DagRunInfoDto dagRunInfoDto =
@@ -156,11 +151,12 @@ public class MainServiceImpl implements MainService {
                 }
 
                 oldDagRuns.addAll(newDagRuns);
+                userState.setDagRunList(oldDagRuns);
 
                 for (DagRun dagRun : tempUserState.getDagRunList()) {
 
                     if (dagRun.getState().equals("failed")) {
-                        for (UserTask userTask : tempUserState.getUserTaskList()) {
+                        for (UserTask userTask : tempUserState.getUser().getListTasks()) {
                             if (userTask.getDagId().equals(dagRun.getDagId()) && !userTask.isPause()) {
                                 userTask.incrementError();
                                 if (userTask.getCountErrors() <= 5) {
@@ -177,7 +173,7 @@ public class MainServiceImpl implements MainService {
                             }
                         }
                     } else if (dagRun.getState().equals("success")) {
-                        for (UserTask userTask : tempUserState.getUserTaskList()) {
+                        for (UserTask userTask : tempUserState.getUser().getListTasks()) {
                             if (userTask.getDagId().equals(dagRun.getDagId()) && !userTask.isPause()) {
                                 if (userTask.getListConf().size() == 1) {
                                     userTask.done();
@@ -205,6 +201,7 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
+    @Transactional
     public void signIn(String login, String password)
             throws UnauthorizedException, URISyntaxException, IOException, InterruptedException {
 
@@ -212,6 +209,19 @@ public class MainServiceImpl implements MainService {
 
         synchronized (this.userState) {
             this.userState.setSignedIn(true);
+
+            User newUser = new User(login);
+            UserDBModel userModel = userRepository.getUser(login);
+
+            if (userModel == null) {
+                userRepository.saveUser(dBmapper.getUserDBModelFromEntity(newUser));
+            } else if (!userModel.getListTasks().isEmpty()) {
+                User userModelMapped = dBmapper.getUserFromDBModel(userModel);
+                newUser.setListTasks(userModelMapped.getListTasks());
+            }
+
+            this.userState.setUser(newUser);
+
         }
     }
 
@@ -219,6 +229,5 @@ public class MainServiceImpl implements MainService {
     private void updateUserState(UserState newUserState) {
         userState.setUser(newUserState.getUser());
         userState.setDagRunList(newUserState.getDagRunList());
-        userState.setUserTaskList(newUserState.getUserTaskList());
     }
 }

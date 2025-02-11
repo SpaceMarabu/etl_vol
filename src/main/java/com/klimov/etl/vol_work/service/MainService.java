@@ -11,11 +11,7 @@ import java.util.List;
 
 public interface MainService {
 
-    User getUser(String userId);
-
     List<User> getAllUsers();
-
-    void saveUser(User user);
 
     UserState getUserState();
 
