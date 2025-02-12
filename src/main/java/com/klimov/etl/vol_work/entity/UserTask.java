@@ -13,6 +13,7 @@ public class UserTask {
     private int countErrors;
     private boolean isPause;
     private boolean isDone;
+    private String comment;
 
     public UserTask(String userId, String dagId, RunType runType, String taskId, List<String> listConf, String lastRunId) {
         this.userId = userId;
@@ -24,9 +25,18 @@ public class UserTask {
         this.countErrors = 0;
         this.isPause = false;
         this.isDone = false;
+        this.comment = "";
     }
 
     public UserTask() {
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public boolean isPause() {

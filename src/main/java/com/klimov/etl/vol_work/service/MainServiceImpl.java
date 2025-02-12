@@ -11,7 +11,7 @@ import com.klimov.etl.vol_work.dto.mapper.ApiMapper;
 import com.klimov.etl.vol_work.dto.repository.DagRepository;
 import com.klimov.etl.vol_work.entity.DagRun;
 import com.klimov.etl.vol_work.entity.User;
-import com.klimov.etl.vol_work.entity.UserState;
+import com.klimov.etl.vol_work.entity.MainScreenState;
 import com.klimov.etl.vol_work.entity.UserTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -19,7 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.AuthenticationException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class MainServiceImpl implements MainService {
     private final DagRepository dagRepository;
     private final DBMapper dBmapper;
     private final ApiMapper apiMapper;
-    private final UserState userState;
+    private final MainScreenState userState;
 
 
     public MainServiceImpl(@Autowired UserRepository userRepository,
@@ -44,7 +43,7 @@ public class MainServiceImpl implements MainService {
         this.dBmapper = dbMapper;
         this.dagRepository = dagRepository;
         this.apiMapper = apiMapper;
-        this.userState = new UserState();
+        this.userState = new MainScreenState();
 
     }
 
@@ -74,7 +73,7 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public UserState getUserState() {
+    public MainScreenState getUserState() {
         return userState;
     }
 
@@ -84,7 +83,7 @@ public class MainServiceImpl implements MainService {
 
         synchronized (this.userState) {
 
-            UserState tempUserState = this.userState;
+            MainScreenState tempUserState = this.userState;
 
             DagRunInfoDto dagRunInfoDto = dagRepository.failDag(dagRun.getDagId(), dagRun.getDagRunId());
             DagRun returnedDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
@@ -117,10 +116,10 @@ public class MainServiceImpl implements MainService {
 
         if (this.userState.isSignedIn()) {
             synchronized (this.userState) {
-                UserState tempUserState = this.userState;
+                MainScreenState tempUserState = this.userState;
 
                 List<DagRun> newDagRuns = new ArrayList<>();
-                List<DagRun> oldDagRuns = !tempUserState.getDagRunList().isEmpty()
+                List<DagRun> oldDagRuns = tempUserState.getDagRunList() != null
                         ? tempUserState.getDagRunList() : new ArrayList<>();
 
                 for (UserTask userTask : tempUserState.getUser().getListTasks()) {
@@ -226,7 +225,7 @@ public class MainServiceImpl implements MainService {
     }
 
 
-    private void updateUserState(UserState newUserState) {
+    private void updateUserState(MainScreenState newUserState) {
         userState.setUser(newUserState.getUser());
         userState.setDagRunList(newUserState.getDagRunList());
     }

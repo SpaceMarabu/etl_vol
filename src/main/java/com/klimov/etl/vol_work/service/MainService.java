@@ -2,7 +2,7 @@ package com.klimov.etl.vol_work.service;
 
 import com.klimov.etl.vol_work.entity.DagRun;
 import com.klimov.etl.vol_work.entity.User;
-import com.klimov.etl.vol_work.entity.UserState;
+import com.klimov.etl.vol_work.entity.MainScreenState;
 
 import javax.naming.AuthenticationException;
 import java.io.IOException;
@@ -13,7 +13,7 @@ public interface MainService {
 
     List<User> getAllUsers();
 
-    UserState getUserState();
+    MainScreenState getUserState();
 
     void failDag(DagRun dagRun) throws IOException, URISyntaxException, InterruptedException;
 

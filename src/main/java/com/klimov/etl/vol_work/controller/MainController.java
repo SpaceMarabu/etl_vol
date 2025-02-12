@@ -24,7 +24,7 @@ public class MainController {
 
         model.addAttribute("credentials", new CredentialsInfo());
 
-        return "login-start";
+        return "login-screen";
     }
 
     @RequestMapping("/checkAccess")
@@ -34,7 +34,7 @@ public class MainController {
             mainService.signIn(credentialsInfo.getLogin(), credentialsInfo.getPassword());
         } catch (UnauthorizedException e) {
             credentialsInfo.setAuthError(true);
-            return "login-start";
+            return "login-screen";
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
