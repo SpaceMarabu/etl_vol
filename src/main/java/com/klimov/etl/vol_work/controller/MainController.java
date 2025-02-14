@@ -2,6 +2,7 @@ package com.klimov.etl.vol_work.controller;
 
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import com.klimov.etl.vol_work.entity.CredentialsInfo;
+import com.klimov.etl.vol_work.entity.UserTask;
 import com.klimov.etl.vol_work.service.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,7 +29,7 @@ public class MainController {
     }
 
     @RequestMapping("/checkAccess")
-    public String checkAccess(@ModelAttribute("credentials") CredentialsInfo credentialsInfo) {
+    public String checkAccess(Model model, @ModelAttribute("credentials") CredentialsInfo credentialsInfo) {
 
         try {
             mainService.signIn(credentialsInfo.getLogin(), credentialsInfo.getPassword());
@@ -38,7 +39,14 @@ public class MainController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return "main-screen";
 
+        model.addAttribute("addingUserTask", new UserTask());
+        return "main-screen";
+    }
+
+    @RequestMapping("/addFLow")
+    public String addFlow(@ModelAttribute("addingUserTask") UserTask addingUserTask) {
+        System.out.println("DONE");
+        return "main-screen";
     }
 }

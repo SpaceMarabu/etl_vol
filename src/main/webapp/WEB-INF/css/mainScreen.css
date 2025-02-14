@@ -1,33 +1,84 @@
 /* Общие стили для всей страницы */
-body {
-    font-family: Arial, sans-serif;
+html, body {
+    height: 100%;
+    width: 100%;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
+    /*display: flex;*/
+    background-color: #f8f9fa;
 }
 
 /* Контейнер для всей страницы */
-.container {
+.root-container {
+    vertical-align: middle;
+    min-height: 1500px;
+    padding: 20px;
+}
+
+.top-container {
+    width: 100%;
+    height: 600px;
+    align-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 100%;
+}
+
+.start-stop-toggle-container {
+    align-content: center;
+    text-align: right;
+    padding: 50px;
+}
+
+.links-container {
+    background-color: red;
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.center-h2 {
     display: flex;
-    padding: 20px;
+    justify-content: center;
+    padding-bottom: 16px;
+    align-items: flex-end;
+    text-align: center;
+    font-family: "Roboto Light", sans-serif;
+    font-size: 28px;
 }
 
-/* Левый блок с кнопками */
-.left-panel, .center-panel, .right-panel {
-    padding: 20px;
-    margin-right: 20px;
-}
-
-.left-panel {
-    flex: 1;
+.center-button {
+    height: 40px;
+    width: 100%;
+    margin-top: 16px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
 }
 
 .center-panel {
-    flex: 2;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    border: 1px solid lightgray;
+    display: grid;
+    padding: 16px;
+    margin: 32px;
+
+    /*grid-template-rows: 100% 100% 100% 100%;*/
+    box-sizing: border-box;
+    /*grid-template-columns: auto auto;*/
 }
 
-.right-panel {
-    flex: 1;
+/* Вводимые поля */
+.input-field {
+    padding: 10px;
+    margin-bottom: 10px;
+    height: 40px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
 }
 
 /* Кнопки */
@@ -89,14 +140,7 @@ button:hover {
     opacity: 0.9;
 }
 
-/* Вводимые поля */
-.input-field {
-    padding: 10px;
-    margin-bottom: 10px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+
 
 /* Панель с таблицей */
 .bottom-panel {
@@ -130,13 +174,3 @@ th {
     color: green;
 }
 
-/* Добавление адаптивности */
-@media screen and (max-width: 768px) {
-    .container {
-        flex-direction: column;
-    }
-    .left-panel, .center-panel, .right-panel {
-        margin-right: 0;
-        margin-bottom: 20px;
-    }
-}
