@@ -4,12 +4,25 @@ import java.util.List;
 
 public class MainScreenState {
     private User user;
+    private boolean isPause;
     private boolean signedIn;
     private List<DagRun> dagRunList;
     private UserTask addingUserTask;
 
+    public MainScreenState() {
+        this.isPause = true;
+    }
+
     public User getUser() {
         return user;
+    }
+
+    public boolean isPause() {
+        return isPause;
+    }
+
+    public void setPause(boolean pause) {
+        isPause = pause;
     }
 
     public boolean isSignedIn() {

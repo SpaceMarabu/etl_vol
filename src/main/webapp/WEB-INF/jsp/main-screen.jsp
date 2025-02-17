@@ -10,6 +10,7 @@
 
 <%--</html>--%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="ru">
@@ -29,10 +30,27 @@
     <div class="top-container">
         <!-- Блок с кнопками для запуска потоков и действий -->
 
-        <div class="start-stop-toggle-container">
-            <button class="button red">Запуск потоков</button>
-            <button class="button green">Действия</button>
+
+        <div class="left-panel">
+            <div class="start-stop-radio-container">
+                <%--@elvariable id="screenState" type="com.klimov.etl.vol_work.entity.MainScreenState"--%>
+                <c:choose>
+                    <c:when test="${screenState.pause}">
+                        <form:form action="setUnpause" modelAttribute="screenState">
+                            <button class="button-on-off button-on-off-not-clicked" type="submit">Вкл.</button>
+                            <button class="button-on-off button-off-clicked" type="submit">Выкл.</button>
+                        </form:form>
+                    </c:when>
+                    <c:otherwise>
+                        <form:form action="setPause" modelAttribute="screenState">
+                            <button class="button-on-off button-on-clicked" type="submit">Вкл.</button>
+                            <button class="button-on-off button-on-off-not-clicked" type="submit">Выкл.</button>
+                        </form:form>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
+
 
         <!-- Центральная часть с добавлением потоков -->
         <div class="center-panel">
@@ -58,18 +76,22 @@
                             placeholder="Комментарий"
                             path="comment"/>
 
-                <button class="center-button green" type="submit">ADD FLOW</button>
+                <button class="center-button" type="submit">ADD FLOW</button>
             </form:form>
         </div>
 
-        <div class="links">
-            <button class="button yellow">RDV карусель</button>
-            <button class="button orange">IDL карусель</button>
-            <button class="button purple">DATA FIX</button>
-            <button class="button blue">Мастер потоки</button>
-            <button class="button teal">Сфера знаний</button>
-            <button class="button brown">GRAFANA</button>
-            <button class="button gray">MIR XA</button>
+
+        <div class="right-container">
+            <h3 class="right-panel-h3">Полезные ссылки</h3>
+            <div class="links-container">
+                <button class="button-right">RDV карусель</button>
+                <button class="button-right">IDL карусель</button>
+                <button class="button-right">DATA FIX</button>
+                <button class="button-right">Мастер потоки</button>
+                <button class="button-right">Сфера знаний</button>
+                <button class="button-right">GRAFANA</button>
+                <button class="button-right">MIR XA</button>
+            </div>
         </div>
     </div>
 
@@ -96,7 +118,7 @@
                 <td>Комментарий</td>
                 <td>2025-02-12</td>
                 <td>
-                    <button class="button red">DELETE</button>
+                    <button class="button-right red">DELETE</button>
                 </td>
             </tr>
             <tr>
@@ -106,7 +128,7 @@
                 <td>Комментарий</td>
                 <td>2025-02-11</td>
                 <td>
-                    <button class="button red">DELETE</button>
+                    <button class="button-right red">DELETE</button>
                 </td>
             </tr>
             <!-- Дополнительные строки -->
