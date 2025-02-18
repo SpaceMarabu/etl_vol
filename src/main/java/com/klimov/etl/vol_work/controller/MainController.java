@@ -1,9 +1,7 @@
 package com.klimov.etl.vol_work.controller;
 
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
-import com.klimov.etl.vol_work.entity.CredentialsInfo;
-import com.klimov.etl.vol_work.entity.MainScreenState;
-import com.klimov.etl.vol_work.entity.UserTask;
+import com.klimov.etl.vol_work.entity.*;
 import com.klimov.etl.vol_work.service.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,7 +11,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-@SessionAttributes(names = {"addingUserTask", "screenState"})
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+
+@SessionAttributes(names = {"addingUserTask", "screenState", "listRunType"})
 @Controller
 public class MainController {
 
@@ -24,13 +27,18 @@ public class MainController {
     }
 
     @ModelAttribute("addingUserTask")
-    public UserTask getDefaultUserTask() {
-        return new UserTask();
+    public UserTaskFromUI getDefaultUserTask() {
+        return new UserTaskFromUI();
     }
 
     @ModelAttribute("screenState")
     public MainScreenState getDefaultScreenState() {
         return new MainScreenState();
+    }
+
+    @ModelAttribute("listRunType")
+    public List<RunType> getRunTypeList() {
+        return Arrays.stream(RunType.values()).toList();
     }
 
     @GetMapping("/")
@@ -42,7 +50,7 @@ public class MainController {
     }
 
     @RequestMapping("/checkAccess")
-    public String checkAccess(Model model, @ModelAttribute("credentials") CredentialsInfo credentialsInfo) {
+    public String checkAccess(@ModelAttribute("credentials") CredentialsInfo credentialsInfo) {
 
         try {
             mainService.signIn(credentialsInfo.getLogin(), credentialsInfo.getPassword());
@@ -57,15 +65,22 @@ public class MainController {
     }
 
     @GetMapping("control_panel")
-    public String controlPanel(@ModelAttribute("addingUserTask") UserTask addingUserTask,
+    public String controlPanel(@ModelAttribute("addingUserTask") UserTaskFromUI addingUserTask,
                                @ModelAttribute("screenState") MainScreenState screenState) {
-        System.out.println("Is pause: " + screenState.isPause());
+        screenState = mainService.getUserState();
         return "main-screen";
     }
 
     @RequestMapping("/addFlow")
-    public String addFlow(@ModelAttribute("addingUserTask") UserTask addingUserTask) {
-        System.out.println("DONE");
+    public String addFlow(@ModelAttribute("addingUserTask") UserTaskFromUI addingUserTask) {
+
+        try {
+            mainService.addTask(addingUserTask);
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+
         return "redirect:/control_panel";
     }
 

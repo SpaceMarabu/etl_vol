@@ -9,10 +9,7 @@ import com.klimov.etl.vol_work.dto.exceptions.DagRunNotFoundException;
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import com.klimov.etl.vol_work.dto.mapper.ApiMapper;
 import com.klimov.etl.vol_work.dto.repository.DagRepository;
-import com.klimov.etl.vol_work.entity.DagRun;
-import com.klimov.etl.vol_work.entity.User;
-import com.klimov.etl.vol_work.entity.MainScreenState;
-import com.klimov.etl.vol_work.entity.UserTask;
+import com.klimov.etl.vol_work.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -79,16 +77,16 @@ public class MainServiceImpl implements MainService {
 
     @Async
     @Override
-    public void failDag(DagRun dagRun) throws IOException, URISyntaxException, InterruptedException {
+    public void failDag(DagRunUI dagRun) throws IOException, URISyntaxException, InterruptedException {
 
         synchronized (this.userState) {
 
             MainScreenState tempUserState = this.userState;
 
             DagRunInfoDto dagRunInfoDto = dagRepository.failDag(dagRun.getDagId(), dagRun.getDagRunId());
-            DagRun returnedDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
+            DagRunUI returnedDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
 
-            for (DagRun dagRunFromList : tempUserState.getDagRunList()) {
+            for (DagRunUI dagRunFromList : tempUserState.getDagRunList()) {
                 if (dagRunFromList.getDagId().equals(returnedDagRun.getDagId())) {
                     dagRunFromList.setState(returnedDagRun.getState());
                 }
@@ -107,19 +105,21 @@ public class MainServiceImpl implements MainService {
         }
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 6000)
     @Async
     @Override
     public void loadUserState()
             throws IOException, URISyntaxException, InterruptedException,
             DagRunNotFoundException, DagNotFoundException {
 
+        System.out.println("Начато обновление userState");
+
         if (this.userState.isSignedIn()) {
             synchronized (this.userState) {
                 MainScreenState tempUserState = this.userState;
 
-                List<DagRun> newDagRuns = new ArrayList<>();
-                List<DagRun> oldDagRuns = tempUserState.getDagRunList() != null
+                List<DagRunUI> newDagRuns = new ArrayList<>();
+                List<DagRunUI> oldDagRuns = tempUserState.getDagRunList() != null
                         ? tempUserState.getDagRunList() : new ArrayList<>();
 
                 for (UserTask userTask : tempUserState.getUser().getListTasks()) {
@@ -127,11 +127,11 @@ public class MainServiceImpl implements MainService {
 
                         DagRunInfoDto dagRunInfoDto =
                                 dagRepository.getDagRunInfo(userTask.getDagId(), userTask.getLastRunId());
-                        DagRun dagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
+                        DagRunUI dagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
 
                         userTask.setLastRunId(dagRun.getDagRunId());
 
-                        for (DagRun runFromUserState : tempUserState.getDagRunList()) {
+                        for (DagRunUI runFromUserState : tempUserState.getDagRunList()) {
                             if (runFromUserState.getDagRunId().equals(userTask.getLastRunId())) {
                                 runFromUserState.setState(dagRun.getState());
                                 break;
@@ -141,9 +141,11 @@ public class MainServiceImpl implements MainService {
                     } else {
 
                         DagRunInfoDto dagRunInfoDto = dagRepository.getLastDagRunInfo(userTask.getDagId());
-                        DagRun dagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
+                        DagRunUI dagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
 
                         userTask.setLastRunId(dagRun.getDagRunId());
+                        dagRun.setComment(userTask.getComment());
+                        dagRun.setTaskId(userTask.getTaskId());
 
                         newDagRuns.add(dagRun);
                     }
@@ -152,7 +154,7 @@ public class MainServiceImpl implements MainService {
                 oldDagRuns.addAll(newDagRuns);
                 userState.setDagRunList(oldDagRuns);
 
-                for (DagRun dagRun : tempUserState.getDagRunList()) {
+                for (DagRunUI dagRun : tempUserState.getDagRunList()) {
 
                     if (dagRun.getState().equals("failed")) {
                         for (UserTask userTask : tempUserState.getUser().getListTasks()) {
@@ -161,7 +163,7 @@ public class MainServiceImpl implements MainService {
                                 if (userTask.getCountErrors() <= 5) {
                                     DagRunInfoDto dagRunInfoDto =
                                             dagRepository.triggerDag(dagRun.getDagId(), dagRun.getConf());
-                                    DagRun newDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
+                                    DagRunUI newDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
 
                                     userTask.setLastRunId(newDagRun.getDagRunId());
                                     dagRun.setState(newDagRun.getState());
@@ -181,7 +183,7 @@ public class MainServiceImpl implements MainService {
 
                                     DagRunInfoDto dagRunInfoDto =
                                             dagRepository.triggerDag(dagRun.getDagId(), userTask.getListConf().get(0));
-                                    DagRun newDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
+                                    DagRunUI newDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
 
                                     userTask.setLastRunId(newDagRun.getDagRunId());
                                     dagRun.setState(newDagRun.getState());
@@ -195,6 +197,7 @@ public class MainServiceImpl implements MainService {
                 }
 
                 updateUserState(tempUserState);
+                System.out.println("Обновление userState завершено");
             }
         }
     }
@@ -222,6 +225,34 @@ public class MainServiceImpl implements MainService {
             this.userState.setUser(newUser);
 
         }
+    }
+
+    @Override
+    public void addTask(UserTaskFromUI userTaskRAW) throws IOException, URISyntaxException, InterruptedException {
+        UserDBModel userModel = userRepository.getUser(userState.getUser().getUserId());
+        User user = dBmapper.getUserFromDBModel(userModel);
+
+        List<String> listConf;
+        if (userTaskRAW.getListConfRAW() != null && !userTaskRAW.getListConfRAW().isEmpty()) {
+            listConf = Arrays.stream(userTaskRAW.getListConfRAW().split("\\n")).toList();
+        } else {
+            listConf = new ArrayList<>();
+            listConf.add("{}");
+        }
+
+
+        UserTask userTask = new UserTask(
+                user.getUserId(),
+                userTaskRAW.getDagId(),
+                userTaskRAW.getRunType(),
+                userTaskRAW.getTaskId(),
+                listConf
+        );
+
+        user.addTask(userTask);
+
+        userRepository.saveUser(dBmapper.getUserDBModelFromEntity(user));
+        loadUserState();
     }
 
 

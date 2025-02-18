@@ -6,8 +6,8 @@ public class MainScreenState {
     private User user;
     private boolean isPause;
     private boolean signedIn;
-    private List<DagRun> dagRunList;
-    private UserTask addingUserTask;
+    private List<DagRunUI> dagRunList;
+    private UserTaskFromUI addingUserTask;
 
     public MainScreenState() {
         this.isPause = true;
@@ -37,19 +37,19 @@ public class MainScreenState {
         this.user = user;
     }
 
-    public List<DagRun> getDagRunList() {
+    public List<DagRunUI> getDagRunList() {
         return dagRunList;
     }
 
-    public void setDagRunList(List<DagRun> dagRunList) {
+    public void setDagRunList(List<DagRunUI> dagRunList) {
         this.dagRunList = dagRunList;
     }
 
-    public UserTask getAddingUserTask() {
+    public UserTaskFromUI getAddingUserTask() {
         return addingUserTask;
     }
 
-    public void setAddingUserTask(UserTask addingUserTask) {
+    public void setAddingUserTask(UserTaskFromUI addingUserTask) {
         this.addingUserTask = addingUserTask;
     }
 }

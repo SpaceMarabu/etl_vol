@@ -67,6 +67,8 @@ public class DagRepositoryImpl implements DagRepository {
         if (response.statusCode() == 200) {
             ObjectMapper objectMapper = new ObjectMapper();
 
+            System.out.println(response.body());
+
             ListDagRunsDto dagRunList = objectMapper.readValue(response.body(), ListDagRunsDto.class);
             int listSize = dagRunList.getTotalEntries();
 

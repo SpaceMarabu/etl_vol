@@ -30,21 +30,21 @@
     <div class="top-container">
         <!-- Блок с кнопками для запуска потоков и действий -->
 
-
         <div class="left-panel">
             <div class="start-stop-radio-container">
                 <%--@elvariable id="screenState" type="com.klimov.etl.vol_work.entity.MainScreenState"--%>
+                <h3 class="left-right-panel-h3">Запуск потоков</h3>
                 <c:choose>
                     <c:when test="${screenState.pause}">
                         <form:form action="setUnpause" modelAttribute="screenState">
-                            <button class="button-on-off button-on-off-not-clicked" type="submit">Вкл.</button>
+                            <%--                            <button class="button-on-off button-on-off-not-clicked" type="submit">Вкл.</button>--%>
                             <button class="button-on-off button-off-clicked" type="submit">Выкл.</button>
                         </form:form>
                     </c:when>
                     <c:otherwise>
                         <form:form action="setPause" modelAttribute="screenState">
                             <button class="button-on-off button-on-clicked" type="submit">Вкл.</button>
-                            <button class="button-on-off button-on-off-not-clicked" type="submit">Выкл.</button>
+                            <%--                            <button class="button-on-off button-on-off-not-clicked" type="submit">Выкл.</button>--%>
                         </form:form>
                     </c:otherwise>
                 </c:choose>
@@ -55,26 +55,47 @@
         <!-- Центральная часть с добавлением потоков -->
         <div class="center-panel">
             <h2 class="center-h2">Добавление потоков</h2>
-            <%--@elvariable id="addingUserTask" type="com.klimov.etl.vol_work.entity.UserTask"--%>
+            <%--@elvariable id="addingUserTask" type="com.klimov.etl.vol_work.entity.UserTaskFromUI"--%>
+            <%--@elvariable id="listRunType" type="List<com.klimov.etl.vol_work.entity.RunType>"--%>
             <form:form action="addFlow" modelAttribute="addingUserTask">
 
-                <form:input class="input-field"
-                            type="text"
-                            name="flow_name"
-                            placeholder="Отслеживание"
-                            path="runType"/>
+                <form:select cssClass="input-field"
+                             id="runType"
+                             path="runType">
+                    <option value=""> Способ запуска</option>
+                    <c:forEach var="runOption" items="${listRunType}">
+                        <option value="${runOption}">${runOption}</option>
+                    </c:forEach>
+                </form:select>
 
                 <form:input class="input-field"
                             type="text"
                             name="dag_id"
                             placeholder="DAG ID"
+                            value="${addingUserTask.dagId}"
                             path="dagId"/>
 
                 <form:input class="input-field"
                             type="text"
                             name="comment"
+                            placeholder="Номер задачи"
+                            value="${addingUserTask.taskId}"
+                            path="taskId"/>
+
+                <form:input class="input-field"
+                            type="text"
+                            name="comment"
                             placeholder="Комментарий"
+                            value="${addingUserTask.comment}"
                             path="comment"/>
+
+                <form:textarea class="input-field text-area"
+                               type="text"
+                               name="config"
+                               placeholder="конфиг1&#10;конфиг2&#10;...&#10;конфиг3"
+                               value="${addingUserTask.listConfRAW}"
+                               path="listConfRAW"
+                               htmlEscape="false"/>
 
                 <button class="center-button" type="submit">ADD FLOW</button>
             </form:form>
@@ -82,15 +103,29 @@
 
 
         <div class="right-container">
-            <h3 class="right-panel-h3">Полезные ссылки</h3>
+            <h3 class="left-right-panel-h3 right-panel-h3">Полезные ссылки</h3>
             <div class="links-container">
-                <button class="button-right">RDV карусель</button>
-                <button class="button-right">IDL карусель</button>
-                <button class="button-right">DATA FIX</button>
-                <button class="button-right">Мастер потоки</button>
-                <button class="button-right">Сфера знаний</button>
-                <button class="button-right">GRAFANA</button>
-                <button class="button-right">MIR XA</button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/RDV', '_blank')">RDV карусель
+                </button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/IDL', '_blank')">IDL карусель
+                </button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/DF', '_blank')">DATA FIX
+                </button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/MP', '_blank')">Мастер потоки
+                </button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/SFERA', '_blank')">Сфера знаний
+                </button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/GRAFANA', '_blank')">GRAFANA
+                </button>
+                <button class="button-right"
+                        onclick="window.open('https://example.com/MIR', '_blank')">MIR XA
+                </button>
             </div>
         </div>
     </div>
@@ -98,7 +133,7 @@
 
     <!-- Нижняя часть с таблицей для мониторинга состояния потоков -->
     <div class="bottom-panel">
-        <h3>Следим за статусом</h3>
+        <h3 class="line-pointer">Следим за статусом</h3>
         <table>
             <thead>
             <tr>
@@ -111,27 +146,18 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>wf_card_wayn_ods</td>
-                <td class="status-running">running</td>
-                <td>02:00, 10:00, 18:00</td>
-                <td>Комментарий</td>
-                <td>2025-02-12</td>
-                <td>
-                    <button class="button-right red">DELETE</button>
-                </td>
-            </tr>
-            <tr>
-                <td>wf_card_wayn_ods</td>
-                <td class="status-success">success</td>
-                <td>20:00</td>
-                <td>Комментарий</td>
-                <td>2025-02-11</td>
-                <td>
-                    <button class="button-right red">DELETE</button>
-                </td>
-            </tr>
-            <!-- Дополнительные строки -->
+            <c:forEach var="dagRun" items="${screenState.dagRunList}">
+                <tr>
+                    <td>${dagRun.dagId}</td>
+                    <td class="status-running">${dagRun.state}</td>
+                    <td>${dagRun.taskId}</td>
+                    <td>${dagRun.comment}</td>
+                    <td>${dagRun.startDate}</td>
+                    <td>
+                        <button class="button-right red">DELETE</button>
+                    </td>
+                </tr>
+            </c:forEach>
             </tbody>
         </table>
     </div>

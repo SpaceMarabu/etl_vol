@@ -15,13 +15,12 @@ public class UserTask {
     private boolean isDone;
     private String comment;
 
-    public UserTask(String userId, String dagId, RunType runType, String taskId, List<String> listConf, String lastRunId) {
+    public UserTask(String userId, String dagId, RunType runType, String taskId, List<String> listConf) {
         this.userId = userId;
         this.dagId = dagId;
         this.runType = runType;
         this.taskId = taskId;
         this.listConf = listConf;
-        this.lastRunId = lastRunId;
         this.countErrors = 0;
         this.isPause = false;
         this.isDone = false;
@@ -29,6 +28,11 @@ public class UserTask {
     }
 
     public UserTask() {
+        this.countErrors = 0;
+        this.isPause = false;
+        this.isDone = false;
+        this.comment = "";
+        this.runType = RunType.OBSERVE;
     }
 
     public String getComment() {

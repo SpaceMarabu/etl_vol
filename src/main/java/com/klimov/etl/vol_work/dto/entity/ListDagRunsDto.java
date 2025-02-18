@@ -1,10 +1,14 @@
 package com.klimov.etl.vol_work.dto.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class ListDagRunsDto {
 
+    @JsonProperty("dag_runs")
     List<DagRunInfoDto> dagRunInfoDtoList;
+    @JsonProperty("total_entries")
     int totalEntries;
 
     public ListDagRunsDto() {

@@ -1,8 +1,6 @@
 package com.klimov.etl.vol_work.service;
 
-import com.klimov.etl.vol_work.entity.DagRun;
-import com.klimov.etl.vol_work.entity.User;
-import com.klimov.etl.vol_work.entity.MainScreenState;
+import com.klimov.etl.vol_work.entity.*;
 
 import javax.naming.AuthenticationException;
 import java.io.IOException;
@@ -15,9 +13,11 @@ public interface MainService {
 
     MainScreenState getUserState();
 
-    void failDag(DagRun dagRun) throws IOException, URISyntaxException, InterruptedException;
+    void failDag(DagRunUI dagRun) throws IOException, URISyntaxException, InterruptedException;
 
     void loadUserState() throws IOException, URISyntaxException, InterruptedException;
 
     void signIn(String login, String password) throws AuthenticationException, URISyntaxException, IOException, InterruptedException;
+
+    void addTask(UserTaskFromUI userTask) throws IOException, URISyntaxException, InterruptedException;
 }

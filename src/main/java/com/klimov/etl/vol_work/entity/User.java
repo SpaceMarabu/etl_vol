@@ -36,4 +36,8 @@ public class User {
     public void setListTasks(List<UserTask> listTasks) {
         this.listTasks = listTasks;
     }
+
+    public void addTask(UserTask userTask) {
+        listTasks.add(userTask);
+    }
 }

@@ -1,13 +1,13 @@
 package com.klimov.etl.vol_work.dto.mapper;
 
 import com.klimov.etl.vol_work.dto.entity.DagRunInfoDto;
-import com.klimov.etl.vol_work.entity.DagRun;
+import com.klimov.etl.vol_work.entity.DagRunUI;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ApiMapper {
 
-    public DagRunInfoDto getDagRunInfoDtoFromEntity(DagRun entity) {
+    public DagRunInfoDto getDagRunInfoDtoFromEntity(DagRunUI entity) {
         return new DagRunInfoDto(
                 entity.getConf(),
                 entity.getDagId(),
@@ -18,8 +18,8 @@ public class ApiMapper {
         );
     }
 
-    public DagRun getDagRunInfoEntityFromDto(DagRunInfoDto dto) {
-        return new DagRun(
+    public DagRunUI getDagRunInfoEntityFromDto(DagRunInfoDto dto) {
+        return new DagRunUI(
                 dto.getConf(),
                 dto.getDagId(),
                 dto.getDagRunId(),

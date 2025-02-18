@@ -18,15 +18,17 @@ public class DBMapper {
 
         List<String> listConf = Arrays.stream(model.getListConf().split(Util.LIST_SEPARATOR)).toList();
         RunType runType = RunType.valueOf(model.getRunType());
-
-        return new UserTask(
+        UserTask userTask = new UserTask(
                 model.getUserId(),
                 model.getDagId(),
                 runType,
                 model.getTaskId(),
-                listConf,
-                model.getLastRunId()
+                listConf
         );
+
+        userTask.setLastRunId(model.getLastRunId());
+
+        return userTask;
     }
 
     public UserTaskDBModel getUserTaskDBModelFromEntity(UserTask entity) {
