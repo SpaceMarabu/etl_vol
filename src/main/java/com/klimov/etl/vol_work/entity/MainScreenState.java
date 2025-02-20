@@ -1,5 +1,6 @@
 package com.klimov.etl.vol_work.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainScreenState {
@@ -11,6 +12,7 @@ public class MainScreenState {
 
     public MainScreenState() {
         this.isPause = true;
+        this.dagRunList = new ArrayList<>();
     }
 
     public User getUser() {

@@ -1,11 +1,11 @@
 package com.klimov.etl.vol_work.dao;
 
 import com.klimov.etl.vol_work.dao.entity.UserDBModel;
+import com.klimov.etl.vol_work.dao.entity.UserTaskDBModel;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,9 +27,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    @Transactional
     public void saveUser(UserDBModel user) {
-        entityManager.merge(user);
+
+//        UserDBModel userFromDb = getUser(user.getUserId());
+//        userFromDb.setListTasks(user.getListTasks());
+
+//        for (UserTaskDBModel userTaskDBModel : userFromDb.getListTasks()) {
+//            entityManager.find(UserTaskDBModel.class, )
+//        }
     }
 
     @Override

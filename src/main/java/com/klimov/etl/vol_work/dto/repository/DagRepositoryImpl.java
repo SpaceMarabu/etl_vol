@@ -67,13 +67,11 @@ public class DagRepositoryImpl implements DagRepository {
         if (response.statusCode() == 200) {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            System.out.println(response.body());
-
             ListDagRunsDto dagRunList = objectMapper.readValue(response.body(), ListDagRunsDto.class);
             int listSize = dagRunList.getTotalEntries();
 
             if (listSize > 0) {
-                return dagRunList.getDagRunInfoDtoList().get(listSize);
+                return dagRunList.getDagRunInfoDtoList().get(listSize - 1);
             }
             {
                 throw new DagRunNotFoundException("Не найдены запуски для потока");

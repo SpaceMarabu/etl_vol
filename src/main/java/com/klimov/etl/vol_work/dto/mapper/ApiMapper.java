@@ -23,7 +23,7 @@ public class ApiMapper {
                 dto.getConf(),
                 dto.getDagId(),
                 dto.getDagRunId(),
-                dto.getStartDate(),
+                dto.getStartDate().substring(0, 19).replace("T", " "),
                 dto.getEndDate(),
                 dto.getState()
         );

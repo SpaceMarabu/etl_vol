@@ -1,5 +1,6 @@
 package com.klimov.etl.vol_work.controller;
 
+import com.klimov.etl.vol_work.dto.exceptions.DagRunNotFoundException;
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import com.klimov.etl.vol_work.entity.*;
 import com.klimov.etl.vol_work.service.MainService;
@@ -67,7 +68,9 @@ public class MainController {
     @GetMapping("control_panel")
     public String controlPanel(@ModelAttribute("addingUserTask") UserTaskFromUI addingUserTask,
                                @ModelAttribute("screenState") MainScreenState screenState) {
-        screenState = mainService.getUserState();
+        MainScreenState newState = mainService.getUserState();
+        screenState.setDagRunList(newState.getDagRunList());
+        screenState.setPause(newState.isPause());
         return "main-screen";
     }
 
