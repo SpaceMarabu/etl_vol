@@ -1,6 +1,5 @@
 package com.klimov.etl.vol_work.dao;
 
-import com.klimov.etl.vol_work.dao.entity.UserDBModel;
 import com.klimov.etl.vol_work.dao.entity.UserTaskDBModel;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
@@ -19,26 +18,29 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<UserDBModel> getAllUsers() {
+    public List<UserTaskDBModel> getAllUsersTasks() {
 
         Session session = entityManager.unwrap(Session.class);
-        return session.createQuery("from UserDBModel ", UserDBModel.class).getResultList();
+        return session.createQuery("from UserTaskDBModel ", UserTaskDBModel.class).getResultList();
 
     }
 
     @Override
-    public void saveUser(UserDBModel user) {
+    public void saveUserTasks(List<UserTaskDBModel> userTasks) {
 
-//        UserDBModel userFromDb = getUser(user.getUserId());
-//        userFromDb.setListTasks(user.getListTasks());
+        for (UserTaskDBModel userTaskDBModel : userTasks) {
+            entityManager.merge(userTaskDBModel);
+        }
 
-//        for (UserTaskDBModel userTaskDBModel : userFromDb.getListTasks()) {
-//            entityManager.find(UserTaskDBModel.class, )
-//        }
     }
 
     @Override
-    public UserDBModel getUser(String userId) {
-        return entityManager.find(UserDBModel.class, userId);
+    public List<UserTaskDBModel> getUserTasks(String userId) {
+
+        Session session = entityManager.unwrap(Session.class);
+
+        return session.createQuery("from UserTaskDBModel where id.userId = :user_id", UserTaskDBModel.class)
+                .setParameter("user_id", userId)
+                .getResultList();
     }
 }

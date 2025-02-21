@@ -7,18 +7,28 @@ public class UserTaskFromUI {
     private String taskId;
     private String listConfRAW;
     private String comment;
+    private int countErrors;
 
-    public UserTaskFromUI(String userId, String dagId, RunType runType, String taskId, String listConf, String lastRunId) {
+    public UserTaskFromUI(String userId, String dagId, RunType runType, String taskId, String listConf, int countErrors) {
         this.dagId = dagId;
         this.runType = runType;
         this.taskId = taskId;
         this.listConfRAW = listConf;
         this.comment = "";
+        this.countErrors = countErrors;
     }
 
     public UserTaskFromUI() {
         this.comment = "";
         this.runType = RunType.OBSERVE;
+    }
+
+    public int getCountErrors() {
+        return countErrors;
+    }
+
+    public void setCountErrors(int countErrors) {
+        this.countErrors = countErrors;
     }
 
     public String getComment() {

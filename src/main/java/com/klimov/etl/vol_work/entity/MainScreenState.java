@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainScreenState {
-    private User user;
+    private String userId;
+    private List<UserTask> userTaskList;
     private boolean isPause;
     private boolean signedIn;
     private List<DagRunUI> dagRunList;
@@ -15,8 +16,20 @@ public class MainScreenState {
         this.dagRunList = new ArrayList<>();
     }
 
-    public User getUser() {
-        return user;
+    public List<UserTask> getUserTaskList() {
+        return userTaskList;
+    }
+
+    public void setUserTaskList(List<UserTask> userTaskList) {
+        this.userTaskList = userTaskList;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean isPause() {
@@ -33,10 +46,6 @@ public class MainScreenState {
 
     public void setSignedIn(boolean signedIn) {
         this.signedIn = signedIn;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public List<DagRunUI> getDagRunList() {

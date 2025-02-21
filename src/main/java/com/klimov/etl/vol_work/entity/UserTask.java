@@ -15,16 +15,22 @@ public class UserTask {
     private boolean isDone;
     private String comment;
 
-    public UserTask(String userId, String dagId, RunType runType, String taskId, List<String> listConf) {
+    public UserTask(String userId,
+                    String dagId,
+                    RunType runType,
+                    String taskId,
+                    List<String> listConf,
+                    String comment,
+                    int countErrors) {
         this.userId = userId;
         this.dagId = dagId;
         this.runType = runType;
         this.taskId = taskId;
         this.listConf = listConf;
-        this.countErrors = 0;
         this.isPause = false;
         this.isDone = false;
-        this.comment = "";
+        this.comment = comment;
+        this.countErrors = countErrors;
     }
 
     public UserTask() {
@@ -111,6 +117,12 @@ public class UserTask {
 
     public List<String> getListConf() {
         return listConf;
+    }
+
+    public void removeFirstConfig() {
+        if (!this.listConf.isEmpty()) {
+            this.listConf = this.listConf.subList(1, listConf.size());
+        }
     }
 
     public void setListConf(List<String> listConf) {

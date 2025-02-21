@@ -1,7 +1,7 @@
 package com.klimov.etl.vol_work.service;
 
 import com.klimov.etl.vol_work.dao.UserRepository;
-import com.klimov.etl.vol_work.dao.entity.UserDBModel;
+import com.klimov.etl.vol_work.dao.entity.UserTaskDBModel;
 import com.klimov.etl.vol_work.dao.mapper.DBMapper;
 import com.klimov.etl.vol_work.dto.entity.DagRunInfoDto;
 import com.klimov.etl.vol_work.dto.exceptions.DagNotFoundException;
@@ -9,7 +9,10 @@ import com.klimov.etl.vol_work.dto.exceptions.DagRunNotFoundException;
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import com.klimov.etl.vol_work.dto.mapper.ApiMapper;
 import com.klimov.etl.vol_work.dto.repository.DagRepository;
-import com.klimov.etl.vol_work.entity.*;
+import com.klimov.etl.vol_work.entity.DagRunUI;
+import com.klimov.etl.vol_work.entity.MainScreenState;
+import com.klimov.etl.vol_work.entity.UserTask;
+import com.klimov.etl.vol_work.entity.UserTaskFromUI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,26 +52,33 @@ public class MainServiceImpl implements MainService {
 
     @Override
     @Transactional
-    public List<User> getAllUsers() {
+    public List<UserTask> getAllUsers() {
 
-        List<User> userList = new ArrayList<>();
+        List<UserTask> userList = new ArrayList<>();
 
-        for (UserDBModel userDBModel : userRepository.getAllUsers()) {
+        for (UserTaskDBModel userTaskDBModel : userRepository.getAllUsersTasks()) {
             userList.add(
-                    dBmapper.getUserFromDBModel(userDBModel)
+                    dBmapper.getUserTaskFromDBModel(userTaskDBModel)
             );
         }
 
         return userList;
     }
 
-    @Scheduled(fixedRate = 6000)
     @Transactional
-    public void saveUser() {
+    public void saveUserTasks() {
         if (userState.isSignedIn()) {
-            userRepository.saveUser(
-                    dBmapper.getUserDBModelFromEntity(userState.getUser())
-            );
+
+            List<UserTask> userTasks = userState.getUserTaskList();
+            List<UserTaskDBModel> userTaskDBModels = new ArrayList<>();
+
+            for (UserTask userTask : userTasks) {
+                userTaskDBModels.add(
+                        dBmapper.getUserTaskDBModelFromEntity(userTask)
+                );
+            }
+
+            userRepository.saveUserTasks(userTaskDBModels);
         }
     }
 
@@ -77,6 +88,7 @@ public class MainServiceImpl implements MainService {
     }
 
     @Async
+    @Transactional
     @Override
     public void failDag(DagRunUI dagRun) throws IOException, URISyntaxException, InterruptedException {
 
@@ -94,7 +106,7 @@ public class MainServiceImpl implements MainService {
                 break;
             }
 
-            for (UserTask userTask : tempUserState.getUser().getListTasks()) {
+            for (UserTask userTask : tempUserState.getUserTaskList()) {
                 if (userTask.getDagId().equals(returnedDagRun.getDagId())) {
                     userTask.setPause(true);
                 }
@@ -102,8 +114,9 @@ public class MainServiceImpl implements MainService {
             }
 
             updateUserState(tempUserState);
-
         }
+
+        loadUserState();
     }
 
     @Scheduled(fixedRate = 6000)
@@ -114,7 +127,8 @@ public class MainServiceImpl implements MainService {
             throws IOException, URISyntaxException, InterruptedException,
             DagRunNotFoundException, DagNotFoundException {
 
-        System.out.println("Начато обновление userState");
+
+        System.out.println("=================Начато обновление userState=================");
 
         if (this.userState.isSignedIn()) {
             synchronized (this.userState) {
@@ -130,10 +144,11 @@ public class MainServiceImpl implements MainService {
                         new ArrayList<>();
 
                 //начинаю обход задач
-                for (UserTask userTask : tempUserState.getUser().getListTasks()) {
+                System.out.println(LocalDateTime.now() + " : начинаю обход задач и наполняю лист запусков");
+                for (UserTask userTask : tempUserState.getUserTaskList()) {
                     //если с таской связан runId
                     if (userTask.getLastRunId() != null) {
-
+                        System.out.println(LocalDateTime.now() + " : Указана связь с запуском. Обновляю инфу");
                         //получаю инфу по этому запуску
                         DagRunInfoDto dagRunInfoDto =
                                 dagRepository.getDagRunInfo(userTask.getDagId(), userTask.getLastRunId());
@@ -144,7 +159,10 @@ public class MainServiceImpl implements MainService {
                         //правлю существующий dagRun или добавляю новый
                         boolean isDagRunExists = false;
                         for (DagRunUI runFromUserState : tempUserState.getDagRunList()) {
-                            if (runFromUserState.getDagRunId().equals(userTask.getLastRunId())) {
+                            if (runFromUserState.getDagRunId() != null &&
+                                    runFromUserState.getDagRunId().equals(userTask.getLastRunId())) {
+                                System.out.println(LocalDateTime.now() + " : " + dagRun.getDagId() + ": " +
+                                        dagRun.getState() + ". " + "update list");
                                 runFromUserState.setState(dagRun.getState());
                                 isDagRunExists = true;
                                 break;
@@ -153,20 +171,25 @@ public class MainServiceImpl implements MainService {
 
                         if (!isDagRunExists) {
                             newDagRuns.add(dagRun);
+                            System.out.println(LocalDateTime.now() + " : " + dagRun.getDagId() + ": " +
+                                    dagRun.getState() + ". " + "insert list");
                         }
 
                     } else {
                         //если с таской не связан runId
+                        System.out.println(LocalDateTime.now() + " : Связи с запуском нет. Ищу");
                         DagRunUI dagRun;
 
                         try {
                             DagRunInfoDto dagRunInfoDto = dagRepository.getLastDagRunInfo(userTask.getDagId());
                             dagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
                             userTask.setLastRunId(dagRun.getDagRunId());
+                            System.out.println(LocalDateTime.now() + " : Найден запуск " + dagRun.getDagRunId());
                         } catch (DagRunNotFoundException e) {
                             dagRun = new DagRunUI();
                             dagRun.setState("no runs");
                             dagRun.setDagId(userTask.getDagId());
+                            System.out.println(LocalDateTime.now() + " : Запусков ранее не было");
                         }
 
                         linkTaskToDagRun(dagRun, userTask);
@@ -177,13 +200,18 @@ public class MainServiceImpl implements MainService {
                 oldDagRuns.addAll(newDagRuns);
                 tempUserState.setDagRunList(oldDagRuns);
 
+                System.out.println(LocalDateTime.now() + " : Начинаю обход запусков");
                 for (DagRunUI dagRun : tempUserState.getDagRunList()) {
 
                     if (dagRun.getState().equals("failed")) {
-                        for (UserTask userTask : tempUserState.getUser().getListTasks()) {
+                        System.out.println(LocalDateTime.now() + " : " + dagRun.getDagId() + " упал");
+
+                        for (UserTask userTask : tempUserState.getUserTaskList()) {
                             if (userTask.getDagId().equals(dagRun.getDagId()) && !userTask.isPause()) {
                                 userTask.incrementError();
                                 if (userTask.getCountErrors() <= 5) {
+                                    System.out.println(LocalDateTime.now() + " : " + dagRun.getDagId() +
+                                            " упал менее пяти раз. Перезапуск");
                                     DagRunInfoDto dagRunInfoDto =
                                             dagRepository.triggerDag(dagRun.getDagId(), dagRun.getConf());
                                     DagRunUI newDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
@@ -195,12 +223,21 @@ public class MainServiceImpl implements MainService {
                             }
                         }
                     } else if (dagRun.getState().equals("success")) {
-                        for (UserTask userTask : tempUserState.getUser().getListTasks()) {
+                        System.out.print(dagRun.getDagId() + " успешно отбежал.");
+                        for (UserTask userTask : tempUserState.getUserTaskList()) {
                             if (userTask.getDagId().equals(dagRun.getDagId()) && !userTask.isPause()) {
                                 if (userTask.getListConf().size() == 1) {
                                     userTask.done();
+                                    System.out.println(" : и конфигов больше нет");
                                 } else {
-                                    userTask.getListConf().remove(0);
+
+
+                                    if (dagRun.getConf().trim().equals(
+                                            userTask.getListConf().get(0).trim()
+                                    )) {
+                                        System.out.println(" : и с нужным конфигом");
+                                        userTask.removeFirstConfig();
+                                    }
 
                                     DagRunInfoDto dagRunInfoDto =
                                             dagRepository.triggerDag(dagRun.getDagId(), userTask.getListConf().get(0));
@@ -210,14 +247,33 @@ public class MainServiceImpl implements MainService {
                                     changeDagRunState(dagRun, newDagRun);
 
                                 }
+
                                 break;
                             }
                         }
+                    } else if (dagRun.getState().equals("no runs")) {
+                        System.out.println(LocalDateTime.now() + " : " + dagRun.getDagId() + " ранее никогда не бегал.");
+                        for (UserTask userTask : tempUserState.getUserTaskList()) {
+                            if (userTask.getDagId().equals(dagRun.getDagId()) && !userTask.isPause()) {
+                                System.out.println(LocalDateTime.now() + " : Запускаю");
+                                DagRunInfoDto dagRunInfoDto =
+                                        dagRepository.triggerDag(dagRun.getDagId(), userTask.getListConf().get(0));
+                                DagRunUI newDagRun = apiMapper.getDagRunInfoEntityFromDto(dagRunInfoDto);
+
+                                userTask.setLastRunId(newDagRun.getDagRunId());
+                                changeDagRunState(dagRun, newDagRun);
+
+                                break;
+                            }
+
+                        }
                     }
+
                 }
 
                 updateUserState(tempUserState);
-                System.out.println("Обновление userState завершено");
+                System.out.println(LocalDateTime.now() + " : Обновление userState завершено");
+                saveUserTasks();
 
             }
         }
@@ -232,18 +288,18 @@ public class MainServiceImpl implements MainService {
 
         synchronized (this.userState) {
             this.userState.setSignedIn(true);
+            this.userState.setUserId(login);
 
-            User newUser = new User(login);
-            UserDBModel userModel = userRepository.getUser(login);
+            List<UserTaskDBModel> userTasksModel = userRepository.getUserTasks(login);
+            List<UserTask> userTaskList = new ArrayList<>();
 
-            if (userModel == null) {
-                this.userState.setUser(newUser);
-            } else if (!userModel.getListTasks().isEmpty()) {
-                User userModelMapped = dBmapper.getUserFromDBModel(userModel);
-                newUser.setListTasks(userModelMapped.getListTasks());
+            for (UserTaskDBModel userTaskDBModel : userTasksModel) {
+                userTaskList.add(
+                        dBmapper.getUserTaskFromDBModel(userTaskDBModel)
+                );
             }
 
-            this.userState.setUser(newUser);
+            this.userState.setUserTaskList(userTaskList);
 
         }
     }
@@ -251,8 +307,6 @@ public class MainServiceImpl implements MainService {
     @Override
     @Transactional
     public void addTask(UserTaskFromUI userTaskRAW) throws IOException, URISyntaxException, InterruptedException {
-        UserDBModel userModel = userRepository.getUser(userState.getUser().getUserId());
-        User user = dBmapper.getUserFromDBModel(userModel);
 
         List<String> listConf;
         if (userTaskRAW.getListConfRAW() != null && !userTaskRAW.getListConfRAW().isEmpty()) {
@@ -265,25 +319,25 @@ public class MainServiceImpl implements MainService {
         }
 
         UserTask userTask = new UserTask(
-                user.getUserId(),
+                this.userState.getUserId(),
                 userTaskRAW.getDagId(),
                 userTaskRAW.getRunType(),
                 userTaskRAW.getTaskId(),
-                listConf
+                listConf,
+                userTaskRAW.getComment(),
+                0
         );
         userTask.setComment(userTaskRAW.getComment());
 
-        user.addTask(userTask);
-
         synchronized (this.userState) {
-            this.userState.setUser(user);
+            this.userState.getUserTaskList().add(userTask);
         }
 
         loadUserState();
     }
 
     private void updateUserState(MainScreenState newUserState) {
-        userState.setUser(newUserState.getUser());
+        userState.setUserTaskList(newUserState.getUserTaskList());
         userState.setDagRunList(newUserState.getDagRunList());
     }
 

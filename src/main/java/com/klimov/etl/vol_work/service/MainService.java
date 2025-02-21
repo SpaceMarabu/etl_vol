@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface MainService {
 
-    List<User> getAllUsers();
+    List<UserTask> getAllUsers();
 
     MainScreenState getUserState();
 

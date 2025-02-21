@@ -1,15 +1,14 @@
 package com.klimov.etl.vol_work.dao;
 
-import com.klimov.etl.vol_work.dao.entity.UserDBModel;
-import com.klimov.etl.vol_work.entity.User;
+import com.klimov.etl.vol_work.dao.entity.UserTaskDBModel;
 
 import java.util.List;
 
 public interface UserRepository {
 
-    List<UserDBModel> getAllUsers();
+    List<UserTaskDBModel> getAllUsersTasks();
 
-    void saveUser(UserDBModel user);
+    void saveUserTasks(List<UserTaskDBModel> userTasks);
 
-    UserDBModel getUser(String userId);
+    List<UserTaskDBModel> getUserTasks(String userId);
 }

@@ -15,7 +15,9 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Date;
 
 @Repository
 public class DagRepositoryImpl implements DagRepository {
@@ -113,8 +115,8 @@ public class DagRepositoryImpl implements DagRepository {
 
         String json = "{" +
                 confF +
-                "\"dag_run_id\": \"string\"," +
-                "\"logical_date\": \"2025-02-06T20:40:36.002Z\"," +
+                "\"dag_run_id\": \"" + dagId + LocalDateTime.now() + "\"," +
+//                "\"logical_date\": \"" + LocalDateTime.now() + "\"," +
                 "\"note\": \"string\"" +
                 "}";
 
@@ -177,7 +179,8 @@ public class DagRepositoryImpl implements DagRepository {
             return objectMapper.readValue(response.body(), DagRunInfoDto.class);
 
         } else {
-            throw new DagNotFoundException("Даг с таким именем не найден, или сервер не ответил");
+            throw new DagNotFoundException("Даг с таким именем не найден, или сервер не ответил\n" +
+                    "Status code: " + response.statusCode() + response.body());
         }
     }
 
