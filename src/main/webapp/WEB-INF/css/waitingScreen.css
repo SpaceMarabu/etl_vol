@@ -1,0 +1,16 @@
+/* Общие стили для всей страницы */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.root-container {
+    vertical-align: middle;
+    width: 100%;
+    height: 100%;
+}
+
+

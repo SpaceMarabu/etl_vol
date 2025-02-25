@@ -40,7 +40,7 @@ public class UserRepositoryImpl implements UserRepository {
         Session session = entityManager.unwrap(Session.class);
 
         return session.createQuery("from UserTaskDBModel where id.userId = :user_id", UserTaskDBModel.class)
-                .setParameter("user_id", userId)
+                .setParameter("user_id", (String) userId)
                 .getResultList();
     }
 }

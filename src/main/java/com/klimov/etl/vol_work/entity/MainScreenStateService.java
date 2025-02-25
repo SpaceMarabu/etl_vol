@@ -3,17 +3,37 @@ package com.klimov.etl.vol_work.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainScreenState {
+public class MainScreenStateService {
     private String userId;
     private List<UserTask> userTaskList;
     private boolean isPause;
     private boolean signedIn;
+    private boolean isInitDone;
     private List<DagRunUI> dagRunList;
-    private UserTaskFromUI addingUserTask;
+    private List<DagRunUI> dagObserveList;
 
-    public MainScreenState() {
+    public MainScreenStateService() {
         this.isPause = true;
+        this.signedIn = false;
+        this.isInitDone = false;
         this.dagRunList = new ArrayList<>();
+        this.dagObserveList = new ArrayList<>();
+    }
+
+    public boolean isInitDone() {
+        return isInitDone;
+    }
+
+    public void initDone() {
+        this.isInitDone = true;
+    }
+
+    public List<DagRunUI> getDagObserveList() {
+        return dagObserveList;
+    }
+
+    public void setDagObserveList(List<DagRunUI> dagObserveList) {
+        this.dagObserveList = dagObserveList;
     }
 
     public List<UserTask> getUserTaskList() {
@@ -54,13 +74,5 @@ public class MainScreenState {
 
     public void setDagRunList(List<DagRunUI> dagRunList) {
         this.dagRunList = dagRunList;
-    }
-
-    public UserTaskFromUI getAddingUserTask() {
-        return addingUserTask;
-    }
-
-    public void setAddingUserTask(UserTaskFromUI addingUserTask) {
-        this.addingUserTask = addingUserTask;
     }
 }

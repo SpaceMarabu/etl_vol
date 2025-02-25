@@ -1,16 +1,12 @@
 package com.klimov.etl.vol_work.controller;
 
-import com.klimov.etl.vol_work.dto.exceptions.DagRunNotFoundException;
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import com.klimov.etl.vol_work.entity.*;
 import com.klimov.etl.vol_work.service.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,8 +29,8 @@ public class MainController {
     }
 
     @ModelAttribute("screenState")
-    public MainScreenState getDefaultScreenState() {
-        return new MainScreenState();
+    public MainScreenStateUI getDefaultScreenState() {
+        return new MainScreenStateUI();
     }
 
     @ModelAttribute("listRunType")
@@ -50,8 +46,16 @@ public class MainController {
         return "login-screen";
     }
 
+    @RequestMapping("waiting_screen")
+    public String waitingScreen(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+
+        return "waiting-screen";
+
+    }
+
     @RequestMapping("/checkAccess")
-    public String checkAccess(@ModelAttribute("credentials") CredentialsInfo credentialsInfo) {
+    public String checkAccess(@ModelAttribute("credentials") CredentialsInfo credentialsInfo,
+                              @ModelAttribute("screenState") MainScreenStateUI screenState) {
 
         try {
             mainService.signIn(credentialsInfo.getLogin(), credentialsInfo.getPassword());
@@ -66,15 +70,17 @@ public class MainController {
     }
 
     @GetMapping("control_panel")
-    public String controlPanel(@ModelAttribute("addingUserTask") UserTaskFromUI addingUserTask,
-                               @ModelAttribute("screenState") MainScreenState screenState) {
-        MainScreenState newState = mainService.getUserState();
-        screenState.setDagRunList(newState.getDagRunList());
-        screenState.setPause(newState.isPause());
+    public String controlPanel(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+
+        updateScreenState(screenState);
+        if (!screenState.isInitDone()) {
+            return "redirect:/waiting_screen";
+        }
+
         return "main-screen";
     }
 
-    @RequestMapping("/addFlow")
+    @PostMapping("/addFlow")
     public String addFlow(@ModelAttribute("addingUserTask") UserTaskFromUI addingUserTask) {
 
         try {
@@ -83,21 +89,28 @@ public class MainController {
             throw new RuntimeException(e);
         }
 
-
         return "redirect:/control_panel";
     }
 
-    @RequestMapping("/setPause")
-    public String setPause(@ModelAttribute("screenState") MainScreenState screenState) {
-        System.out.println("DONE setPause");
-        screenState.setPause(true);
+    @PostMapping("/setPause")
+    public String setPause(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+        mainService.pauseStarts();
         return "redirect:/control_panel";
     }
 
-    @RequestMapping("/setUnpause")
-    public String setUnpause(@ModelAttribute("screenState") MainScreenState screenState) {
-        System.out.println("DONE setUnpause");
-        screenState.setPause(false);
+    @PostMapping("/setUnpause")
+    public String setUnpause(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+        mainService.unpauseStarts();
         return "redirect:/control_panel";
+    }
+
+    private void updateScreenState(MainScreenStateUI screenState) {
+
+        MainScreenStateService newState = mainService.getUserState();
+
+        screenState.setInitDone(newState.isInitDone());
+        screenState.setDagObserveList(newState.getDagObserveList());
+        screenState.setDagRunList(newState.getDagRunList());
+        screenState.setPause(newState.isPause());
     }
 }

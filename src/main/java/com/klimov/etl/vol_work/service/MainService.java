@@ -11,7 +11,7 @@ public interface MainService {
 
     List<UserTask> getAllUsers();
 
-    MainScreenState getUserState();
+    MainScreenStateService getUserState();
 
     void failDag(DagRunUI dagRun) throws IOException, URISyntaxException, InterruptedException;
 
@@ -20,4 +20,8 @@ public interface MainService {
     void signIn(String login, String password) throws AuthenticationException, URISyntaxException, IOException, InterruptedException;
 
     void addTask(UserTaskFromUI userTask) throws IOException, URISyntaxException, InterruptedException;
+
+    void pauseStarts();
+
+    void unpauseStarts();
 }

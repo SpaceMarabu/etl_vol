@@ -180,22 +180,51 @@ table {
 
 table, th, td {
     border: 1px solid #ddd;
+
 }
 
 th, td {
     padding: 10px;
     text-align: center;
+    width: 14%;
+}
+
+.th-td-dag-id-comment {
+    width: 22%;
 }
 
 th {
     background-color: #f4f4f4;
+    font-family: "Roboto Thin", sans-serif;
+    font-size: 18px;
 }
 
-.status-running {
-    color: red;
+td {
+    font-family: "Roboto Light", sans-serif;
+    font-size: 16px;
+}
+
+.status-failed {
+    background-color: orangered;
 }
 
 .status-success {
-    color: green;
+    background-color: limegreen;
 }
+
+.other-dagrun-status {
+    background-color: lightyellow;
+}
+
+.button-manage-task {
+    width: 60px;
+    height: 25px;
+    margin: 8px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    background-color: #FFD35F;
+}
+
 

@@ -5,7 +5,7 @@ public class UserTaskFromUI {
     private String dagId;
     private RunType runType;
     private String taskId;
-    private String listConfRAW;
+    private String listConfRaw;
     private String comment;
     private int countErrors;
 
@@ -13,7 +13,7 @@ public class UserTaskFromUI {
         this.dagId = dagId;
         this.runType = runType;
         this.taskId = taskId;
-        this.listConfRAW = listConf;
+        this.listConfRaw = listConf;
         this.comment = "";
         this.countErrors = countErrors;
     }
@@ -63,11 +63,11 @@ public class UserTaskFromUI {
         this.taskId = taskId;
     }
 
-    public String getListConfRAW() {
-        return listConfRAW;
+    public String getListConfRaw() {
+        return listConfRaw;
     }
 
-    public void setListConfRAW(String listConfRAW) {
-        this.listConfRAW = listConfRAW;
+    public void setListConfRaw(String listConfRaw) {
+        this.listConfRaw = listConfRaw;
     }
 }

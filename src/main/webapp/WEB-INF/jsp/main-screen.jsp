@@ -32,7 +32,7 @@
 
         <div class="left-panel">
             <div class="start-stop-radio-container">
-                <%--@elvariable id="screenState" type="com.klimov.etl.vol_work.entity.MainScreenState"--%>
+                <%--@elvariable id="screenState" type="com.klimov.etl.vol_work.entity.MainScreenStateService"--%>
                 <h3 class="left-right-panel-h3">Запуск потоков</h3>
                 <c:choose>
                     <c:when test="${screenState.pause}">
@@ -93,14 +93,13 @@
                                type="text"
                                name="config"
                                placeholder="конфиг1&#10;конфиг2&#10;...&#10;конфиг3"
-                               value="${addingUserTask.listConfRAW}"
-                               path="listConfRAW"
+                               value="${addingUserTask.listConfRaw}"
+                               path="listConfRaw"
                                htmlEscape="false"/>
 
                 <button class="center-button" type="submit">ADD FLOW</button>
             </form:form>
         </div>
-
 
         <div class="right-container">
             <h3 class="left-right-panel-h3 right-panel-h3">Полезные ссылки</h3>
@@ -133,14 +132,56 @@
 
     <!-- Нижняя часть с таблицей для мониторинга состояния потоков -->
     <div class="bottom-panel">
-        <h3 class="line-pointer">Следим за статусом</h3>
+
+        <c:if test="${screenState.dagObserveList.size() > 0}">
+            <h3 class="line-pointer">Следим за статусом</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th class="th-td-dag-id-comment">DAG ID</th>
+                    <th>СТАТУС</th>
+                    <th>ЗАДАЧА</th>
+                    <th class="th-td-dag-id-comment">КОММЕНТАРИЙ</th>
+                    <th>ЗАПУСК</th>
+                    <th>ДЕЙСТВИЯ</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="dagRun" items="${screenState.dagObserveList}">
+                    <tr>
+                        <td class="th-td-dag-id-comment">${dagRun.dagId}</td>
+                        <c:choose>
+                            <c:when test="${dagRun.state == 'success'}">
+                                <td class="status-success">${dagRun.state}</td>
+                            </c:when>
+                            <c:when test="${dagRun.state == 'failed' || dagRun.state == 'no runs'}">
+                                <td class="status-failed">${dagRun.state}</td>
+                            </c:when>
+                            <c:otherwise>
+                                <td class="other-dagrun-status">${dagRun.state}</td>
+                            </c:otherwise>
+                        </c:choose>
+                        <td>${dagRun.taskId}</td>
+                        <td class="th-td-dag-id-comment">${dagRun.comment}</td>
+                        <td>${dagRun.startDate}</td>
+                        <td>
+                            <button class="button-manage-task">DELETE</button>
+                        </td>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
+        </c:if>
+        <%--@elvariable id="runType" type="com.klimov.etl.vol_work.entity.RunType"--%>
+        <c:if test="${screenState.dagRunList.size() > 0}">
+        <h3 class="line-pointer">Запуск по конфигам</h3>
         <table>
             <thead>
             <tr>
-                <th>DAG ID</th>
+                <th class="th-td-dag-id-comment">DAG ID</th>
                 <th>СТАТУС</th>
                 <th>ЗАДАЧА</th>
-                <th>КОММЕНТАРИЙ</th>
+                <th class="th-td-dag-id-comment">КОММЕНТАРИЙ</th>
                 <th>ЗАПУСК</th>
                 <th>ДЕЙСТВИЯ</th>
             </tr>
@@ -148,19 +189,31 @@
             <tbody>
             <c:forEach var="dagRun" items="${screenState.dagRunList}">
                 <tr>
-                    <td>${dagRun.dagId}</td>
-                    <td class="status-running">${dagRun.state}</td>
+                    <td class="th-td-dag-id-comment">${dagRun.dagId}</td>
+                    <c:choose>
+                        <c:when test="${dagRun.state == 'success'}">
+                            <td class="status-success">${dagRun.state}</td>
+                        </c:when>
+                        <c:when test="${dagRun.state == 'failed' || dagRun.state == 'no runs'}">
+                            <td class="status-failed">${dagRun.state}</td>
+                        </c:when>
+                        <c:otherwise>
+                            <td class="other-dagrun-status">${dagRun.state}</td>
+                        </c:otherwise>
+                    </c:choose>
                     <td>${dagRun.taskId}</td>
-                    <td>${dagRun.comment}</td>
+                    <td class="th-td-dag-id-comment">${dagRun.comment}</td>
                     <td>${dagRun.startDate}</td>
                     <td>
-                        <button class="button-right red">DELETE</button>
+                        <button class="button-manage-task">DELETE</button>
+                        <button class="button-manage-task">RESET</button>
                     </td>
                 </tr>
             </c:forEach>
             </tbody>
         </table>
     </div>
+    </c:if>
 
 </div>
 
