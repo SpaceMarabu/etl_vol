@@ -2,6 +2,7 @@ package com.klimov.etl.vol_work.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainScreenStateUI {
 

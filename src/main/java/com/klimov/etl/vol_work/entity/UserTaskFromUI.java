@@ -1,5 +1,7 @@
 package com.klimov.etl.vol_work.entity;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class UserTaskFromUI {
 
     private String dagId;
@@ -69,5 +71,19 @@ public class UserTaskFromUI {
 
     public void setListConfRaw(String listConfRaw) {
         this.listConfRaw = listConfRaw;
+    }
+
+    public class AddingTaskErrors {
+        boolean isDagIdError;
+        boolean isRunTypeError;
+        boolean isTaskIdError;
+        boolean isConfError;
+    }
+
+    public class AddingTaskErrorMessage {
+        String dagIdError;
+        String runTypeError;
+        String taskIdError;
+        String confError;
     }
 }

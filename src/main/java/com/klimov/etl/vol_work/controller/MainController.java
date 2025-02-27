@@ -6,6 +6,7 @@ import com.klimov.etl.vol_work.service.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -13,7 +14,9 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
-@SessionAttributes(names = {"addingUserTask", "screenState", "listRunType"})
+import static com.klimov.etl.vol_work.controller.util.Constants.*;
+
+@SessionAttributes(names = {USER_TASK_ATTRIBUTE, SCREEN_STATE_ATTRIBUTE, LIST_RUN_TYPE_ATTRIBUTE})
 @Controller
 public class MainController {
 
@@ -23,39 +26,38 @@ public class MainController {
         this.mainService = mainService;
     }
 
-    @ModelAttribute("addingUserTask")
+    @ModelAttribute(USER_TASK_ATTRIBUTE)
     public UserTaskFromUI getDefaultUserTask() {
         return new UserTaskFromUI();
     }
 
-    @ModelAttribute("screenState")
+    @ModelAttribute(SCREEN_STATE_ATTRIBUTE)
     public MainScreenStateUI getDefaultScreenState() {
         return new MainScreenStateUI();
     }
 
-    @ModelAttribute("listRunType")
+    @ModelAttribute(LIST_RUN_TYPE_ATTRIBUTE)
     public List<RunType> getRunTypeList() {
         return Arrays.stream(RunType.values()).toList();
     }
 
-    @GetMapping("/")
+    @GetMapping(BASE_URL)
     public String loginStart(Model model) {
 
-        model.addAttribute("credentials", new CredentialsInfo());
+        model.addAttribute(CREDENTIALS_ATTRIBUTE, new CredentialsInfo());
 
         return "login-screen";
     }
 
-    @RequestMapping("waiting_screen")
-    public String waitingScreen(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+    @RequestMapping(WAITING_SCREEN_URL)
+    public String waitingScreen(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
 
         return "waiting-screen";
-
     }
 
-    @RequestMapping("/checkAccess")
-    public String checkAccess(@ModelAttribute("credentials") CredentialsInfo credentialsInfo,
-                              @ModelAttribute("screenState") MainScreenStateUI screenState) {
+    @RequestMapping(CHECK_ACCESS_URL)
+    public String checkAccess(@ModelAttribute(CREDENTIALS_ATTRIBUTE) CredentialsInfo credentialsInfo,
+                              @ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
 
         try {
             mainService.signIn(credentialsInfo.getLogin(), credentialsInfo.getPassword());
@@ -66,22 +68,28 @@ public class MainController {
             throw new RuntimeException(e);
         }
 
-        return "redirect:/control_panel";
+        return "redirect:/" + HOME_SCREEN_URL;
     }
 
-    @GetMapping("control_panel")
-    public String controlPanel(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+    @GetMapping(HOME_SCREEN_URL)
+    public String controlPanel(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
 
         updateScreenState(screenState);
         if (!screenState.isInitDone()) {
-            return "redirect:/waiting_screen";
+            return "redirect:/" + WAITING_SCREEN_URL;
         }
 
         return "main-screen";
     }
 
-    @PostMapping("/addFlow")
-    public String addFlow(@ModelAttribute("addingUserTask") UserTaskFromUI addingUserTask) {
+    @PostMapping(ADD_USER_TASK_URL)
+    public String addFlow(@ModelAttribute(USER_TASK_ATTRIBUTE) UserTaskFromUI addingUserTask,
+                          @ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenStateUI,
+                          BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return "redirect:/" + HOME_SCREEN_URL;
+        }
 
         try {
             mainService.addTask(addingUserTask);
@@ -89,19 +97,19 @@ public class MainController {
             throw new RuntimeException(e);
         }
 
-        return "redirect:/control_panel";
+        return "redirect:/" + HOME_SCREEN_URL;
     }
 
-    @PostMapping("/setPause")
-    public String setPause(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+    @PostMapping(SET_PAUSE_URL)
+    public String setPause(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
         mainService.pauseStarts();
-        return "redirect:/control_panel";
+        return "redirect:/" + HOME_SCREEN_URL;
     }
 
-    @PostMapping("/setUnpause")
-    public String setUnpause(@ModelAttribute("screenState") MainScreenStateUI screenState) {
+    @PostMapping(SET_UNPAUSE_URL)
+    public String setUnpause(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
         mainService.unpauseStarts();
-        return "redirect:/control_panel";
+        return "redirect:/" + HOME_SCREEN_URL;
     }
 
     private void updateScreenState(MainScreenStateUI screenState) {
