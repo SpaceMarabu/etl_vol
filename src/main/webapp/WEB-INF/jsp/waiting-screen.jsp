@@ -27,7 +27,7 @@
 <!-- Основной контейнер для макета -->
 <div class="root-container">
     <h3>Загрузка данных. Пожалуйста, подождите...</h3>
-    <meta http-equiv="refresh" content="10; URL=controlPanel">
+    <meta http-equiv="refresh" content="5; URL=controlPanel">
 
 </div>
 

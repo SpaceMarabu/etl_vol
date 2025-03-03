@@ -116,7 +116,7 @@ public class MainServiceImpl implements MainService {
         loadUserState();
     }
 
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = 60000)
     @Async
     @Override
     @Transactional
@@ -322,15 +322,24 @@ public class MainServiceImpl implements MainService {
             }
 
             this.userState.setUserTaskList(userTaskList);
-
         }
+
+        loadUserState();
     }
 
     @Override
     @Transactional
     public void addTask(UserTaskFromUI userTaskRaw) throws IOException, URISyntaxException, InterruptedException {
 
-        List<String> listConf;
+        if (
+                !this.userState.getUserTaskList().stream().filter(
+                        userTask -> userTask.getDagId().equals(userTaskRaw.getDagId())
+                ).toList().isEmpty()
+        ) {
+            return;
+        }
+
+            List<String> listConf;
         if (userTaskRaw.getListConfRaw() != null && !userTaskRaw.getListConfRaw().isEmpty()) {
             listConf = Arrays.stream(
                     userTaskRaw.getListConfRaw().split("\\n")
@@ -353,6 +362,24 @@ public class MainServiceImpl implements MainService {
 
         synchronized (this.userState) {
             this.userState.getUserTaskList().add(userTask);
+        }
+
+        loadUserState();
+    }
+
+    @Override
+    @Transactional
+    public void deleteTask(String taskId) throws IOException, URISyntaxException, InterruptedException {
+        synchronized (this.userState) {
+
+            List<UserTask> userTaskList = this.userState.getUserTaskList();
+
+            for (int i = 0; i < userTaskList.size(); i++) {
+                if (userTaskList.get(i).getTaskId().equals(taskId)) {
+                    userTaskList.remove(i);
+                    break;
+                }
+            }
         }
 
         loadUserState();

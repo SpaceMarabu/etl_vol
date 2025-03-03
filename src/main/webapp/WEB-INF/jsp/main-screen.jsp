@@ -60,15 +60,19 @@
             <form:form action="addFlow" modelAttribute="addingUserTask">
 
                 <form:select cssClass="input-field"
+                             cssErrorClass="input-field error-field"
                              id="runType"
                              path="runType">
-                    <option value=""> Способ запуска</option>
+                    <option value="${addingUserTask.runType}">${addingUserTask.runType}</option>
                     <c:forEach var="runOption" items="${listRunType}">
-                        <option value="${runOption}">${runOption}</option>
+                        <c:if test="${runOption != addingUserTask.runType}">
+                            <option value="${runOption}">${runOption}</option>
+                        </c:if>
                     </c:forEach>
                 </form:select>
 
                 <form:input class="input-field"
+                            cssErrorClass="input-field error-field"
                             type="text"
                             name="dag_id"
                             placeholder="DAG ID"
@@ -76,6 +80,7 @@
                             path="dagId"/>
 
                 <form:input class="input-field"
+                            cssErrorClass="input-field error-field"
                             type="text"
                             name="comment"
                             placeholder="Номер задачи"
@@ -83,6 +88,7 @@
                             path="taskId"/>
 
                 <form:input class="input-field"
+                            cssErrorClass="input-field error-field"
                             type="text"
                             name="comment"
                             placeholder="Комментарий"
@@ -90,6 +96,7 @@
                             path="comment"/>
 
                 <form:textarea class="input-field text-area"
+                               cssErrorClass="input-field text-area error-field"
                                type="text"
                                name="config"
                                placeholder="конфиг1&#10;конфиг2&#10;...&#10;конфиг3"
@@ -188,6 +195,9 @@
             </thead>
             <tbody>
             <c:forEach var="dagRun" items="${screenState.dagRunList}">
+                <c:url var="deleteButton" value="/deleteTask">
+                    <c:param name="taskId" value="${dagRun.taskId}"/>
+                </c:url>
                 <tr>
                     <td class="th-td-dag-id-comment">${dagRun.dagId}</td>
                     <c:choose>
@@ -205,7 +215,8 @@
                     <td class="th-td-dag-id-comment">${dagRun.comment}</td>
                     <td>${dagRun.startDate}</td>
                     <td>
-                        <button class="button-manage-task">DELETE</button>
+                        <button class="button-manage-task"
+                                onclick="window.location.href='${deleteButton}'">DELETE</button>
                         <button class="button-manage-task">RESET</button>
                     </td>
                 </tr>

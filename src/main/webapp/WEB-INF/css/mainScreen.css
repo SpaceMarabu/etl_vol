@@ -136,6 +136,10 @@ html, body {
     box-sizing: border-box;
 }
 
+.error-field {
+    border: 1px solid red;
+}
+
 .text-area {
     height: 120px;
     resize: none;

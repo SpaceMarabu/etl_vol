@@ -1,11 +1,18 @@
 package com.klimov.etl.vol_work.entity;
 
+import com.klimov.etl.vol_work.validation.CheckDagId;
+import com.klimov.etl.vol_work.validation.CheckConfNotNullIfRunWithConf;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+@CheckConfNotNullIfRunWithConf
 public class UserTaskFromUI {
 
+    @CheckDagId
     private String dagId;
+    @NotNull
     private RunType runType;
+    @NotBlank
     private String taskId;
     private String listConfRaw;
     private String comment;
@@ -21,8 +28,21 @@ public class UserTaskFromUI {
     }
 
     public UserTaskFromUI() {
-        this.comment = "";
+        this.dagId = "";
         this.runType = RunType.OBSERVE;
+        this.taskId = "";
+        this.listConfRaw = "";
+        this.comment = "";
+        this.countErrors = 0;
+    }
+
+    public void clear() {
+        this.dagId = "";
+        this.runType = RunType.OBSERVE;
+        this.taskId = "";
+        this.listConfRaw = "";
+        this.comment = "";
+        this.countErrors = 0;
     }
 
     public int getCountErrors() {

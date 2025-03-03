@@ -21,6 +21,8 @@ public interface MainService {
 
     void addTask(UserTaskFromUI userTask) throws IOException, URISyntaxException, InterruptedException;
 
+    void deleteTask(String taskId) throws IOException, URISyntaxException, InterruptedException;
+
     void pauseStarts();
 
     void unpauseStarts();

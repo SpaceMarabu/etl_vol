@@ -3,6 +3,7 @@ package com.klimov.etl.vol_work.controller;
 import com.klimov.etl.vol_work.dto.exceptions.UnauthorizedException;
 import com.klimov.etl.vol_work.entity.*;
 import com.klimov.etl.vol_work.service.MainService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -75,6 +76,7 @@ public class MainController {
     public String controlPanel(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
 
         updateScreenState(screenState);
+
         if (!screenState.isInitDone()) {
             return "redirect:/" + WAITING_SCREEN_URL;
         }
@@ -83,12 +85,12 @@ public class MainController {
     }
 
     @PostMapping(ADD_USER_TASK_URL)
-    public String addFlow(@ModelAttribute(USER_TASK_ATTRIBUTE) UserTaskFromUI addingUserTask,
-                          @ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenStateUI,
-                          BindingResult bindingResult) {
+    public String addFlow(@Valid @ModelAttribute(USER_TASK_ATTRIBUTE) UserTaskFromUI addingUserTask,
+                          BindingResult bindingResult,
+                          @ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenStateUI) {
 
         if (bindingResult.hasErrors()) {
-            return "redirect:/" + HOME_SCREEN_URL;
+            return "main-screen";
         }
 
         try {
@@ -96,6 +98,8 @@ public class MainController {
         } catch (IOException | URISyntaxException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        addingUserTask.clear();
 
         return "redirect:/" + HOME_SCREEN_URL;
     }
@@ -109,6 +113,18 @@ public class MainController {
     @PostMapping(SET_UNPAUSE_URL)
     public String setUnpause(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
         mainService.unpauseStarts();
+        return "redirect:/" + HOME_SCREEN_URL;
+    }
+
+    @GetMapping("/deleteTask")
+    public String deleteEmployee(@RequestParam("taskId") String taskId) {
+
+        try {
+            mainService.deleteTask(taskId);
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         return "redirect:/" + HOME_SCREEN_URL;
     }
 
