@@ -216,6 +216,10 @@ td {
     background-color: limegreen;
 }
 
+.status-done {
+    background-color: lime;
+}
+
 .other-dagrun-status {
     background-color: lightyellow;
 }

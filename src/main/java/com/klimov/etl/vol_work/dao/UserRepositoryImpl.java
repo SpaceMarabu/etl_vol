@@ -3,6 +3,7 @@ package com.klimov.etl.vol_work.dao;
 import com.klimov.etl.vol_work.dao.entity.UserTaskDBModel;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +36,20 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void deleteUserTask(String userId, String dagId) {
+
+        Session session = entityManager.unwrap(Session.class);
+
+        Query<UserTaskDBModel> query = session.createQuery("delete from UserTaskDBModel " +
+                "where userTaskPK.userId =:userId " +
+                "and userTaskPK.dagId = :dagId");
+        query.setParameter("userId", userId);
+        query.setParameter("dagId", dagId);
+        query.executeUpdate();
+
+    }
+
+    @Override
     public List<UserTaskDBModel> getUserTasks(String userId) {
 
         Session session = entityManager.unwrap(Session.class);
@@ -43,4 +58,6 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("user_id", (String) userId)
                 .getResultList();
     }
+
+
 }

@@ -116,7 +116,6 @@ public class DagRepositoryImpl implements DagRepository {
         String json = "{" +
                 confF +
                 "\"dag_run_id\": \"" + dagId + LocalDateTime.now() + "\"," +
-//                "\"logical_date\": \"" + LocalDateTime.now() + "\"," +
                 "\"note\": \"string\"" +
                 "}";
 
@@ -180,7 +179,7 @@ public class DagRepositoryImpl implements DagRepository {
 
         } else {
             throw new DagNotFoundException("Даг с таким именем не найден, или сервер не ответил\n" +
-                    "Status code: " + response.statusCode() + response.body());
+                    response.statusCode() + response.body());
         }
     }
 

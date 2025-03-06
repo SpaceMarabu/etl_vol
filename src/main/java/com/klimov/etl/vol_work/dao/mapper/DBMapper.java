@@ -5,6 +5,7 @@ import com.klimov.etl.vol_work.entity.RunType;
 import com.klimov.etl.vol_work.entity.UserTask;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,7 +14,11 @@ public class DBMapper {
 
     public UserTask getUserTaskFromDBModel(UserTaskDBModel model) {
 
-        List<String> listConf = Arrays.stream(model.getListConf().split(Util.LIST_SEPARATOR)).toList();
+        List<String> listConf = new ArrayList<>();
+        if (model.getListConf() != null && !model.getListConf().isBlank()) {
+            listConf = Arrays.stream(model.getListConf().split(Util.LIST_SEPARATOR)).toList();
+        }
+
         RunType runType = RunType.valueOf(model.getRunType());
         UserTask userTask = new UserTask(
                 model.getUserTaskPK().getUserId(),
@@ -32,7 +37,10 @@ public class DBMapper {
 
     public UserTaskDBModel getUserTaskDBModelFromEntity(UserTask entity) {
 
-        String listConf = String.join(Util.LIST_SEPARATOR, entity.getListConf());
+        String listConf = null;
+        if (entity.getListConf() != null && !entity.getListConf().isEmpty()) {
+            listConf = String.join(Util.LIST_SEPARATOR, entity.getListConf());
+        }
         String runType = entity.getRunType().name();
 
         return new UserTaskDBModel(

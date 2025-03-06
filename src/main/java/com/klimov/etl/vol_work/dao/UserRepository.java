@@ -10,5 +10,7 @@ public interface UserRepository {
 
     void saveUserTasks(List<UserTaskDBModel> userTasks);
 
+    void deleteUserTask(String userId, String dagId);
+
     List<UserTaskDBModel> getUserTasks(String userId);
 }

@@ -12,7 +12,6 @@ public class UserTask {
     private String lastRunId;
     private int countErrors;
     private boolean isPause;
-    private boolean isDone;
     private String comment;
 
     public UserTask(String userId,
@@ -28,7 +27,6 @@ public class UserTask {
         this.taskId = taskId;
         this.listConf = listConf;
         this.isPause = false;
-        this.isDone = false;
         this.comment = comment;
         this.countErrors = countErrors;
     }
@@ -36,9 +34,12 @@ public class UserTask {
     public UserTask() {
         this.countErrors = 0;
         this.isPause = false;
-        this.isDone = false;
         this.comment = "";
         this.runType = RunType.OBSERVE;
+    }
+
+    public void resetErrors() {
+        this.countErrors = 0;
     }
 
     public String getComment() {
@@ -55,14 +56,6 @@ public class UserTask {
 
     public void setPause(boolean pause) {
         isPause = pause;
-    }
-
-    public boolean isDone() {
-        return isDone;
-    }
-
-    public void done() {
-        isDone = true;
     }
 
     public int getCountErrors() {

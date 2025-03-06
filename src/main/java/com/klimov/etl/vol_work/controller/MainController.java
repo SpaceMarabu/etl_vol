@@ -104,6 +104,26 @@ public class MainController {
         return "redirect:/" + HOME_SCREEN_URL;
     }
 
+    @RequestMapping("/deleteTask")
+    public String deleteTask(@RequestParam("taskId") String taskId) {
+
+        try {
+            mainService.deleteTask(taskId);
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return "redirect:/" + HOME_SCREEN_URL;
+    }
+
+    @RequestMapping("/resetTask")
+    public String resetTask(@RequestParam("taskId") String taskId) {
+
+        mainService.resetTask(taskId);
+
+        return "redirect:/" + HOME_SCREEN_URL;
+    }
+
     @PostMapping(SET_PAUSE_URL)
     public String setPause(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
         mainService.pauseStarts();
@@ -113,18 +133,6 @@ public class MainController {
     @PostMapping(SET_UNPAUSE_URL)
     public String setUnpause(@ModelAttribute(SCREEN_STATE_ATTRIBUTE) MainScreenStateUI screenState) {
         mainService.unpauseStarts();
-        return "redirect:/" + HOME_SCREEN_URL;
-    }
-
-    @GetMapping("/deleteTask")
-    public String deleteEmployee(@RequestParam("taskId") String taskId) {
-
-        try {
-            mainService.deleteTask(taskId);
-        } catch (IOException | URISyntaxException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         return "redirect:/" + HOME_SCREEN_URL;
     }
 

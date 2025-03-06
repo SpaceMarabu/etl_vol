@@ -23,6 +23,8 @@ public interface MainService {
 
     void deleteTask(String taskId) throws IOException, URISyntaxException, InterruptedException;
 
+    void resetTask(String taskId);
+
     void pauseStarts();
 
     void unpauseStarts();

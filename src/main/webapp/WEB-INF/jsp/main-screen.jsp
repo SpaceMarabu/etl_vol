@@ -10,23 +10,22 @@
 
 <%--</html>--%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="<c:url value='/css/main-screen.css'/>" />
     <title>Dashboard</title>
-    <style>
-        <%@include file="/WEB-INF/css/mainScreen.css" %>
-    </style>
 </head>
 <body>
 
 <!-- Основной контейнер для макета -->
 <div class="root-container">
-
+    <meta http-equiv="refresh" content="60; URL=controlPanel">
     <div class="top-container">
         <!-- Блок с кнопками для запуска потоков и действий -->
 
@@ -155,8 +154,15 @@
                 </thead>
                 <tbody>
                 <c:forEach var="dagRun" items="${screenState.dagObserveList}">
+                    <c:url var="deleteButton" value="/deleteTask">
+                        <c:param name="taskId" value="${dagRun.taskId}"/>
+                    </c:url>
                     <tr>
-                        <td class="th-td-dag-id-comment">${dagRun.dagId}</td>
+                        <td class="th-td-dag-id-comment">
+                            <a href="http://0.0.0.0:8081/dagrun/list/?_flt_1_dag_id=${fn:substring(dagRun.dagId, 2, -1)}"
+                               target="_blank"
+                            >${dagRun.dagId}</a>
+                        </td>
                         <c:choose>
                             <c:when test="${dagRun.state == 'success'}">
                                 <td class="status-success">${dagRun.state}</td>
@@ -172,7 +178,9 @@
                         <td class="th-td-dag-id-comment">${dagRun.comment}</td>
                         <td>${dagRun.startDate}</td>
                         <td>
-                            <button class="button-manage-task">DELETE</button>
+                            <button class="button-manage-task"
+                                    onclick="window.location.href='${deleteButton}'">DELETE
+                            </button>
                         </td>
                     </tr>
                 </c:forEach>
@@ -198,11 +206,24 @@
                 <c:url var="deleteButton" value="/deleteTask">
                     <c:param name="taskId" value="${dagRun.taskId}"/>
                 </c:url>
+                <c:url var="resetButton" value="/resetTask">
+                    <c:param name="taskId" value="${dagRun.taskId}"/>
+                </c:url>
+                <c:url var="resetButton" value="/resetTask">
+                    <c:param name="taskId" value="${dagRun}"/>
+                </c:url>
                 <tr>
-                    <td class="th-td-dag-id-comment">${dagRun.dagId}</td>
+                    <td class="th-td-dag-id-comment">
+                        <a href="http://0.0.0.0:8081/dagrun/list/?_flt_1_dag_id=${fn:substring(dagRun.dagId, 2, -1)}"
+                           target="_blank"
+                        >${dagRun.dagId}</a>
+                    </td>
                     <c:choose>
                         <c:when test="${dagRun.state == 'success'}">
                             <td class="status-success">${dagRun.state}</td>
+                        </c:when>
+                        <c:when test="${dagRun.state == 'done'}">
+                            <td class="status-done">${dagRun.state}</td>
                         </c:when>
                         <c:when test="${dagRun.state == 'failed' || dagRun.state == 'no runs'}">
                             <td class="status-failed">${dagRun.state}</td>
@@ -216,8 +237,17 @@
                     <td>${dagRun.startDate}</td>
                     <td>
                         <button class="button-manage-task"
-                                onclick="window.location.href='${deleteButton}'">DELETE</button>
-                        <button class="button-manage-task">RESET</button>
+                                onclick="window.location.href='${deleteButton}'">DELETE
+                        </button>
+                        <button class="button-manage-task"
+                                onclick="window.location.href='${resetButton}'">RESET
+                        </button>
+
+                        <c:if test="${dagRun.conf.length() > 0}">
+                        <button id="conf-button" class="button-manage-task"
+                                onclick="copyToClipboard('${dagRun.conf}')">CONF
+                        </button>
+                        </c:if>
                     </td>
                 </tr>
             </c:forEach>
@@ -228,5 +258,6 @@
 
 </div>
 
+<script src="${pageContext.request.contextPath}/scripts/copyToClipboard.js"></script>
 </body>
 </html>

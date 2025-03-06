@@ -6,7 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style><%@include file="/WEB-INF/css/loginScreen.css"%></style>
+<%--    <style><%@include file="/WEB-INF/css/loginScreen.css"%></style>--%>
+    <link rel="stylesheet" href="<c:url value='/css/loginScreen.css'/>" />
     <title>Login Page</title>
 </head>
 <body>
