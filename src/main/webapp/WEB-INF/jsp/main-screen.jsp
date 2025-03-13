@@ -1,14 +1,3 @@
-<%--<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>--%>
-<%--<!DOCTYPE html>--%>
-<%--<html>--%>
-
-<%--<body>--%>
-<%--<h2>Cool</h2>--%>
-
-
-<%--</body>--%>
-
-<%--</html>--%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -18,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<c:url value='/css/main-screen.css'/>" />
+    <link rel="stylesheet" href="<c:url value='/css/mainScreen.css'/>" />
     <title>Dashboard</title>
 </head>
 <body>
